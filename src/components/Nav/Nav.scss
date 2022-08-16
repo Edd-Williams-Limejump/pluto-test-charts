@@ -1,0 +1,12 @@
+.nav {
+  position: fixed;
+  inset: 0;
+
+  &__list {
+    display: flex;
+    gap: 12px;
+    justify-content: space-evenly;
+
+    list-style: none;
+  }
+}
