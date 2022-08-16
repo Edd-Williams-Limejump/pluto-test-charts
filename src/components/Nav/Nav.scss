@@ -1,11 +1,13 @@
 .nav {
-  position: fixed;
-  inset: 0;
+  padding: 12px;
 
   &__list {
+    all: unset;
+    margin: 0;
     display: flex;
     gap: 12px;
     justify-content: space-evenly;
+    align-items: center;
 
     list-style: none;
   }
