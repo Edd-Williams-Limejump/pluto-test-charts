@@ -24,6 +24,7 @@ const data = [
   },
   {
     label: "Asteroids",
+    // This axis ID is important when defining
     secondaryAxisId: "2",
     data: [
       {
@@ -72,15 +73,26 @@ const ReactCharts = () => {
         <p>
           <a href="https://react-charts.tanstack.com/">Documentation</a>
         </p>
-        <p>Does not support Pie charts:</p>
-        <blockquote style={{ fontStyle: "italic" }}>
-          React Charts only supports X/Y chart layouts and purposefully does not
-          have support for pie charts, radar charts, or other circular nonsense.
-        </blockquote>
 
         <p>
-          I also think this is still in beta and not working exactly as
-          expected. It's forever zooming and I can't work out why
+          <ul>
+            <li>
+              <strong>Does not support Pie charts:</strong>
+              <blockquote style={{ fontStyle: "italic" }}>
+                React Charts only supports X/Y chart layouts and purposefully
+                does not have support for pie charts, radar charts, or other
+                circular nonsense.
+              </blockquote>
+            </li>
+            <li>
+              I think this is still in beta and requires a lot of digging
+              through source code to understand what's going on under the hood
+            </li>
+            <li>
+              Using typescript with this would help as all of the code is
+              written with types and that would likely help our understanding
+            </li>
+          </ul>
         </p>
       </div>
 
