@@ -92,6 +92,53 @@ const ReactCharts = () => {
               Using typescript with this would help as all of the code is
               written with types and that would likely help our understanding
             </li>
+            <li>
+              Structure looks something like this
+              <pre>
+                <code>
+                  {`const data = [
+                {
+                  label: "Stars",
+                  data: [
+                    {
+                      date: new Date(),
+                      stars: 23,
+                    },
+                    {
+                      date: new Date().setDate(new Date().getDate() + 1),
+                      stars: 23,
+                    },
+                    {
+                      date: new Date().setDate(new Date().getDate() + 2),
+                      stars: 81,
+                    },
+                  ],
+                },
+                {
+                  label: "Asteroids",
+                  // This axis ID is important when defining
+                  secondaryAxisId: "2",
+                  data: [
+                    {
+                      date: new Date(),
+                      asteroids: 10,
+                    },
+                    {
+                      date: new Date().setDate(new Date().getDate() + 1),
+                      asteroids: 50,
+                    },
+                    {
+                      date: new Date().setDate(new Date().getDate() + 2),
+                      asteroids: 20,
+                    },
+                  ],
+                }
+              ];
+              </code>
+              </pre>`}
+                </code>
+              </pre>
+            </li>
           </ul>
         </p>
       </div>
