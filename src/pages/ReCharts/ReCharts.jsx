@@ -71,6 +71,7 @@ const data2 = generateTimeDataArray(20);
 
 const ReCharts = () => {
   const [scrollingState, setScrollingState] = useState(data2);
+  const [extraDataCount, setExtraDataCount] = useState(0);
   const intervalRef = useRef();
 
   const addItemToScrollingState = () => {
@@ -92,7 +93,11 @@ const ReCharts = () => {
     };
   }, []);
 
-  const stopLoadingNewDate = () => {
+  useEffect(() => {
+    if (scrollingState.length >= 30) stopLoadingNewData();
+  }, [scrollingState]);
+
+  const stopLoadingNewData = () => {
     clearInterval(intervalRef.current);
   };
 
@@ -110,6 +115,29 @@ const ReCharts = () => {
 
         <ul>
           <li>This is really great for static charts</li>
+          <li>Handles incoming data well (see below)</li>
+          <li>Everything is very customisable in the same way that SVGs are</li>
+          <li>
+            The data is much nicer to handle as it comes as an object with all
+            our fields in this case something like
+          </li>
+
+          <pre>
+            <code>
+              {`let data = {
+                  datetime: date,
+                  output: randomIntFromInterval(0, 25),
+                  dcLow: randomIntFromInterval(1, 5),
+                  dcHigh: randomIntFromInterval(1, 12),
+                }`}
+            </code>
+          </pre>
+
+          <li>
+            Since we're just setting a time period and would be fetching this
+            from the API with a websocket, I think this could be a very good
+            candidate
+          </li>
         </ul>
       </div>
       <div>
@@ -130,7 +158,7 @@ const ReCharts = () => {
         </ComposedChart>
       </div>
       <div>
-        <button onClick={stopLoadingNewDate}>Stop Loading New Data</button>
+        <button onClick={stopLoadingNewData}>Stop Loading New Data</button>
         <ComposedChart
           width={730}
           height={250}
