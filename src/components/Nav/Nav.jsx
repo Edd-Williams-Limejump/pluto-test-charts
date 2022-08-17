@@ -15,6 +15,9 @@ const Nav = () => {
         <li>
           <Link to="/recharts">ReCharts</Link>
         </li>
+        <li>
+          <Link to="chartjs">ChartJS</Link>
+        </li>
       </ul>
     </nav>
   );

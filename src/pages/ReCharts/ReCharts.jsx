@@ -12,7 +12,10 @@ import {
   YAxis,
 } from "recharts";
 import { Page } from "../../components";
-import { generateTimeData, generateTimeDataArray } from "./generateTimeData";
+import {
+  generateTimeData,
+  generateTimeDataArray,
+} from "../../generateTimeData";
 
 const addToDate = (numberOfDays) => {
   var date = new Date();
