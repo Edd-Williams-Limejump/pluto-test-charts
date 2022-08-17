@@ -7,12 +7,13 @@ const Nav = () => {
     <nav className="nav">
       <ul className="nav__list">
         <li>
-          <Link exact to="/">
-            Home
-          </Link>
+          <Link to="/">Home</Link>
         </li>
         <li>
           <Link to="/react-charts">React Charts</Link>
+        </li>
+        <li>
+          <Link to="/recharts">ReCharts</Link>
         </li>
       </ul>
     </nav>

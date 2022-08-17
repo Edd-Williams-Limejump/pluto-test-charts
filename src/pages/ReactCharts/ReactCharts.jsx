@@ -74,29 +74,28 @@ const ReactCharts = () => {
           <a href="https://react-charts.tanstack.com/">Documentation</a>
         </p>
 
-        <p>
-          <ul>
-            <li>
-              <strong>Does not support Pie charts:</strong>
-              <blockquote style={{ fontStyle: "italic" }}>
-                React Charts only supports X/Y chart layouts and purposefully
-                does not have support for pie charts, radar charts, or other
-                circular nonsense.
-              </blockquote>
-            </li>
-            <li>
-              I think this is still in beta and requires a lot of digging
-              through source code to understand what's going on under the hood
-            </li>
-            <li>
-              Using typescript with this would help as all of the code is
-              written with types and that would likely help our understanding
-            </li>
-            <li>
-              Structure looks something like this
-              <pre>
-                <code>
-                  {`const data = [
+        <ul>
+          <li>
+            <strong>Does not support Pie charts:</strong>
+            <blockquote style={{ fontStyle: "italic" }}>
+              React Charts only supports X/Y chart layouts and purposefully does
+              not have support for pie charts, radar charts, or other circular
+              nonsense.
+            </blockquote>
+          </li>
+          <li>
+            I think this is still in beta and requires a lot of digging through
+            source code to understand what's going on under the hood
+          </li>
+          <li>
+            Using typescript with this would help as all of the code is written
+            with types and that would likely help our understanding
+          </li>
+          <li>
+            Structure looks something like this
+            <pre>
+              <code>
+                {`const data = [
                 {
                   label: "Stars",
                   data: [
@@ -136,11 +135,10 @@ const ReactCharts = () => {
               ];
               </code>
               </pre>`}
-                </code>
-              </pre>
-            </li>
-          </ul>
-        </p>
+              </code>
+            </pre>
+          </li>
+        </ul>
       </div>
 
       {/* Needed to set specific height and width to prevent it expanding 🤷 */}
