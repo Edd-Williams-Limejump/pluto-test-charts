@@ -8,6 +8,7 @@ export const randomIntFromInterval = (min, max) => {
 export const generateTimeData = (date) => {
   return {
     datetime: date,
+    forcast: randomIntFromInterval(0, 25),
     output: randomIntFromInterval(0, 25),
     dcLow: randomIntFromInterval(1, 5),
     dcHigh: randomIntFromInterval(1, 12),

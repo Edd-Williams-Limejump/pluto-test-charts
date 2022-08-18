@@ -4,9 +4,10 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
+  Label,
   Legend,
   Line,
-  LineChart,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -15,6 +16,7 @@ import { Page } from "../../components";
 import {
   generateTimeData,
   generateTimeDataArray,
+  randomIntFromInterval,
 } from "../../generateTimeData";
 
 const addToDate = (numberOfDays) => {
@@ -22,51 +24,83 @@ const addToDate = (numberOfDays) => {
   if (numberOfDays) {
     date.setDate(date.getDate() + numberOfDays);
   }
-  return date;
+  return date.toDateString();
 };
 
 const data1 = [
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(),
     forecast: 4000,
     actual: 2400,
     profit: 2400,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(2),
     forecast: 3000,
     actual: 1398,
     profit: 2210,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(3),
     forecast: 2000,
     actual: 9800,
     profit: 2290,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(4),
     forecast: 2780,
     actual: 3908,
     profit: 2000,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(5),
     forecast: 1890,
     actual: 4800,
     profit: 2181,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(6),
     forecast: 2390,
     actual: 3800,
     profit: 2500,
   },
   {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
     date: addToDate(7),
     forecast: 3490,
     actual: 4300,
     profit: 2100,
+  },
+  {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
+    date: addToDate(8),
+    forecast: 4000,
+  },
+  {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
+    date: addToDate(9),
+    forecast: 5000,
+  },
+  {
+    dcLow: randomIntFromInterval(1, 5),
+    dcHigh: randomIntFromInterval(1, 12),
+    date: addToDate(10),
+    forecast: 5500,
   },
 ];
 
@@ -74,7 +108,6 @@ const data2 = generateTimeDataArray(20);
 
 const ReCharts = () => {
   const [scrollingState, setScrollingState] = useState(data2);
-  const [extraDataCount, setExtraDataCount] = useState(0);
   const intervalRef = useRef();
 
   const addItemToScrollingState = () => {
@@ -150,19 +183,30 @@ const ReCharts = () => {
           data={data1}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="1" vertical={true} />
           <XAxis dataKey="date" />
-          <YAxis label="£/MwH" />
+          <YAxis
+            label={{ value: "£/mwH", angle: -90, position: "insideLeft" }}
+          />
+          <YAxis yAxisId="right" orientation="right" />
+
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="forecast" stroke="#8884d8" />
-          <Line type="monotone" dataKey="actual" stroke="#82ca9d" />
-          <Bar dataKey="profit" stroke="red" opacity="0.3" />
+          <ReferenceLine
+            x={data1[4].date}
+            stroke="green"
+            label={{ value: "Now", angle: -90 }}
+          />
+          <Line type="linear" dot={false} dataKey="forecast" stroke="#8884d8" />
+          <Line type="linear" dot={false} dataKey="actual" stroke="#82ca9d" />
+          {/* <Bar dataKey="profit" stroke="red" opacity="0.3" /> */}
+          <Bar yAxisId="right" stackId="a" dataKey="dcLow" fill="#dc3c3c" />
+          <Bar yAxisId="right" stackId="a" dataKey="dcHigh" fill="#743cdc" />
         </ComposedChart>
       </div>
       <div>
         <button onClick={stopLoadingNewData}>Stop Loading New Data</button>
-        <ComposedChart
+        {/* <ComposedChart
           width={730}
           height={250}
           data={scrollingState}
@@ -176,7 +220,7 @@ const ReCharts = () => {
           <Line type="monotone" dataKey="output" />
           <Bar stackId="a" dataKey="dcLow" fill="#8884d8" />
           <Bar stackId="a" dataKey="dcHigh" fill="#82ca9d" />
-        </ComposedChart>
+        </ComposedChart> */}
       </div>
     </Page>
   );
