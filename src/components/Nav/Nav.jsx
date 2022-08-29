@@ -18,6 +18,9 @@ const Nav = () => {
         <li>
           <Link to="chartjs">ChartJS</Link>
         </li>
+        <li>
+          <Link to="d3">D3</Link>
+        </li>
       </ul>
     </nav>
   );
