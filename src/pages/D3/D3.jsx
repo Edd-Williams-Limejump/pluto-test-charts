@@ -39,7 +39,7 @@ const D3 = () => {
     const xScale = d3
       .scaleBand()
       .domain(data.map((d) => d.datetime))
-      .range([CHART_START_Y, CHART_END_X])
+      .range([CHART_START_X, CHART_END_X])
       .paddingOuter(0)
       .paddingInner(0.2)
       .align(0.5);
@@ -47,7 +47,7 @@ const D3 = () => {
     const yScale = d3
       .scaleLinear()
       .domain([15, -15])
-      .range([CHART_START_X, CHART_END_Y]);
+      .range([CHART_START_Y, CHART_END_Y]);
 
     // Draw X Axis
     const xAxis = d3
@@ -108,10 +108,10 @@ const D3 = () => {
       .attr("stroke-width", 0)
       .attr("x", (d) => xScale(d.data.datetime))
       .attr("y", (d) => {
-        return yScale(d[1]);
-        // return yScale(Math.min(0, d[1]));
+        return yScale(Math.max(0, d[1]));
+        // return Math.min(yScale(d[1]), CHART_MID_Y);
       })
-      .attr("width", xScale.bandwidth() - 3)
+      .attr("width", xScale.bandwidth())
       .attr("height", (d) => {
         const calculatedHeight = yScale(d[0]) - yScale(d[1]);
         // if (d[1] < 0) {
