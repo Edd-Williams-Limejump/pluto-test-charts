@@ -9,7 +9,7 @@ const D3 = () => {
 
   const margin = { top: 35, right: 35, bottom: 35, left: 35 };
 
-  const CHART_WIDTH = 700 - margin.left - margin.right;
+  const CHART_WIDTH = 800 - margin.left - margin.right;
   const CHART_HEIGHT = 400 - margin.top - margin.bottom;
 
   const CHART_START_X = margin.left;
@@ -52,16 +52,23 @@ const D3 = () => {
       .domain([15, -15]);
 
     // Draw X Axis
+    const xAxis = d3
+      .axisBottom(xScale)
+      .ticks(5)
+      .tickFormat(d3.timeFormat("%-I %p"));
+
     svg
       .append("g")
       .attr("transform", `translate(0, ${CHART_END_Y})`)
-      .call(d3.axisBottom(xScale).ticks(5));
+      .call(xAxis);
 
     // Draw Y Axis
+    const yAxis = d3.axisLeft(yScale).ticks(5);
+
     svg
       .append("g")
       .attr("transform", `translate(${CHART_START_X}, 0)`)
-      .call(d3.axisLeft(yScale).ticks(3));
+      .call(yAxis);
 
     // Create midpoint line
     chart
@@ -69,7 +76,7 @@ const D3 = () => {
       .style("stroke", "black")
       .style("stroke-width", 1)
       .attr("x1", CHART_START_X)
-      .attr("x2", CHART_WIDTH + margin.right)
+      .attr("x2", CHART_WIDTH + 100)
       .attr("y1", CHART_MID_Y)
       .attr("y2", CHART_MID_Y);
 
