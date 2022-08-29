@@ -2,6 +2,7 @@ import { Page } from "../../components";
 import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
 import { generateTradingData } from "./generateTradingData";
+import { select } from "d3";
 
 const D3 = () => {
   const d3Container = useRef(null);
@@ -90,7 +91,10 @@ const D3 = () => {
       .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
     // Build stacked data
-    const stackedData = d3.stack().keys(keys)(data);
+    // THIS WAS THE LINE I NEEDED. STACK OFFSETDIVERGING!
+    const stackedData = d3.stack().keys(keys).offset(d3.stackOffsetDiverging)(
+      data
+    );
 
     const groups = chart
       .append("g")
@@ -109,38 +113,31 @@ const D3 = () => {
       .attr("x", (d) => xScale(d.data.datetime))
       .attr("y", (d) => {
         return yScale(Math.max(0, d[1]));
-        // return Math.min(yScale(d[1]), CHART_MID_Y);
       })
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => {
-        const calculatedHeight = yScale(d[0]) - yScale(d[1]);
-        // if (d[1] < 0) {
-        //   return Math.abs(calculatedHeight);
-        // }
-
-        // if (calculatedHeight === 0) return calculatedHeight;
-        return Math.abs(calculatedHeight);
+        return yScale(d[0]) - yScale(d[1]);
       });
 
     // Create an invisible group that acts as a hover
-    // chart
-    //   .selectAll(".hover")
-    //   .data(data)
-    //   .enter()
-    //   .append("rect")
-    //   .attr("x", (d) => xScale(d.datetime))
-    //   .attr("y", CHART_START_Y)
-    //   .attr("height", CHART_HEIGHT)
-    //   .attr("width", (d) => 15)
-    //   //   .attr("stroke", "black")
-    //   .attr("fill", "#a8a8a8")
-    //   .attr("fill-opacity", 0)
-    //   .on("mouseover", (element) =>
-    //     select(element.currentTarget).attr("fill-opacity", 0.2)
-    //   )
-    //   .on("mouseout", (element) =>
-    //     select(element.currentTarget).attr("fill-opacity", 0)
-    //   );
+    chart
+      .selectAll(".hover")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("x", (d) => xScale(d.datetime))
+      .attr("y", CHART_START_Y)
+      .attr("height", CHART_HEIGHT)
+      .attr("width", (d) => 15)
+      //   .attr("stroke", "black")
+      .attr("fill", "#a8a8a8")
+      .attr("fill-opacity", 0)
+      .on("mouseover", (element) =>
+        select(element.currentTarget).attr("fill-opacity", 0.2)
+      )
+      .on("mouseout", (element) =>
+        select(element.currentTarget).attr("fill-opacity", 0)
+      );
 
     // Remove bars if needed (Not entirely sure on this one)
     chart.selectAll(".bar").data(data).exit().remove();
