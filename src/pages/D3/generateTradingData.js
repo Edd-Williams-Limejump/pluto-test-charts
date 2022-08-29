@@ -1,24 +1,32 @@
 import { randomIntFromInterval } from "../../generateTimeData";
 import add from "date-fns/add";
 
-export const generateTimeData = (date) => {
+function roundMinutes(date) {
+  date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
+  date.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
+
+  return date;
+}
+
+export const generateTimeData = (date, id) => {
   return {
-    id: Math.floor(Math.random() * 100),
-    daHourly: randomIntFromInterval(-5, 0),
-    haHHourly: randomIntFromInterval(-1, 0),
-    intraday: randomIntFromInterval(0, 3),
+    id,
+    // id: Math.floor(Math.random() * 100),
+    // daHourly: randomIntFromInterval(-5, 0),
+    // haHHourly: randomIntFromInterval(-1, 0),
+    // intraday: randomIntFromInterval(0, 3),
     dcLow: randomIntFromInterval(0, 9),
     dcHigh: randomIntFromInterval(-9, 0),
-    datatime: date,
+    datetime: date,
   };
 };
 
 export const generateTradingData = (length, startDate = new Date()) => {
   const timeSeries = [];
-  let baseDate = startDate;
+  let baseDate = roundMinutes(startDate);
 
   for (var i = 0; i < length; i++) {
-    timeSeries.push(generateTimeData(add(baseDate, { minutes: 30 })));
+    timeSeries.push(generateTimeData(add(baseDate, { minutes: 30 }), i + 1));
     baseDate = add(baseDate, { minutes: 30 });
   }
 
