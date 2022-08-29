@@ -1,5 +1,5 @@
 import { Page } from "../../components";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useId } from "react";
 import * as d3 from "d3";
 import { generateTradingData } from "./generateTradingData";
 import { select } from "d3";
@@ -118,6 +118,15 @@ const D3 = () => {
         return yScale(d[0]) - yScale(d[1]);
       });
 
+    const tooltip = d3
+      .select(`#d3-container`)
+      .append("div")
+      .style("background-color", "rgba(117,117,117,0.9")
+      .style("position", "absolute")
+      .style("width", "300px")
+      .style("height", "200px")
+      .style("visibility", "hidden");
+
     // Create an invisible group that acts as a hover
     chart
       .selectAll(".hover")
@@ -128,15 +137,24 @@ const D3 = () => {
       .attr("y", CHART_START_Y)
       .attr("height", CHART_HEIGHT)
       .attr("width", (d) => xScale.bandwidth() + 6)
-      //   .attr("stroke", "black")
       .attr("fill", "#a8a8a8")
       .attr("fill-opacity", 0)
-      .on("mouseover", (element) =>
-        select(element.currentTarget).attr("fill-opacity", 0.2)
-      )
-      .on("mouseout", (element) =>
-        select(element.currentTarget).attr("fill-opacity", 0)
-      );
+      .on("mouseover", (event) => {
+        // console.log(event);
+        select(event.currentTarget).attr("fill-opacity", 0.2);
+        tooltip.style("visibility", "visible");
+        tooltip.style("top", "25%");
+
+        if (event.offsetX > 500) {
+          tooltip.style("left", event.offsetX - 320 + "px");
+        } else {
+          tooltip.style("left", event.offsetX + 20 + "px");
+        }
+      })
+      .on("mouseout", (element) => {
+        tooltip.style("visibility", "hidden");
+        select(element.currentTarget).attr("fill-opacity", 0);
+      });
 
     // Remove bars if needed (Not entirely sure on this one)
     chart.selectAll(".bar").data(data).exit().remove();
@@ -144,7 +162,9 @@ const D3 = () => {
 
   return (
     <Page title="D3">
-      <svg className="d3-component" ref={d3Container} />
+      <div id="d3-container" style={{ position: "relative" }}>
+        <svg className="d3-component" ref={d3Container} />
+      </div>
     </Page>
   );
 };
