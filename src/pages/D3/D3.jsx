@@ -49,7 +49,7 @@ const D3 = () => {
     const yScale = d3
       .scaleLinear()
       .range([CHART_START_X, CHART_END_Y])
-      .domain([10, -10]);
+      .domain([15, -15]);
 
     // Draw X Axis
     svg
@@ -73,25 +73,55 @@ const D3 = () => {
       .attr("y1", CHART_MID_Y)
       .attr("y2", CHART_MID_Y);
 
-    // Create bars for DC Low
-    chart
-      .selectAll(".bar")
-      .data(data, (d) => d.id)
-      .enter()
-      .append("rect")
-      .classed("bar", true)
-      .attr("fill", "rgb(64, 132, 225)")
-      .attr("rx", 4)
-      .attr("width", 8)
+    const color = d3
+      .scaleOrdinal()
+      .domain(["dcLow", "intraday"])
+      .range(["#e41a1c", "#377eb8", "#4daf4a"]);
+
+    const stackedData = d3.stack().keys(["dcLow", "intraday"])(data);
+    console.log(stackedData);
+
+    const groups = chart
+      .append("g")
+      .selectAll("g")
+      .data(stackedData)
+      .join("g")
+      .attr("fill", (d) => color(d));
+
+    groups
+      .selectAll("rect")
+      .data((d) => d)
+      .join("rect")
+      .attr("rx", 6)
+      .attr("stroke-width", 0)
+      .attr("x", (d) => xScale(d.data.datetime))
+      .attr("y", (d) => yScale(d[1]))
+      .attr("width", 10)
       .attr("height", (d) => {
-        return CHART_MID_Y - yScale(d.dcLow);
-      })
-      .attr("x", (d) => xScale(d.datetime))
-      .attr("y", (d) => yScale(d.dcLow));
+        const calculatedHeight = yScale(d[0]) - yScale(d[1]);
+        if (calculatedHeight === 0) return calculatedHeight;
+        return calculatedHeight - 1;
+      });
+
+    // Create bars for DC Low WORKING
+    // chart
+    //   .selectAll(".bar")
+    //   .data(data, (d) => d.id)
+    //   .enter()
+    //   .append("rect")
+    //   .classed("bar", true)
+    //   .attr("fill", "rgb(64, 132, 225)")
+    //   .attr("rx", 4)
+    //   .attr("width", 8)
+    //   .attr("height", (d) => {
+    //     return CHART_MID_Y - yScale(d.dcLow);
+    //   })
+    //   .attr("x", (d) => xScale(d.datetime))
+    //   .attr("y", (d) => yScale(d.dcLow));
 
     // Create bars for DC High?
 
-    // Add some labels for DC High
+    // Add some labels for DC Low
     chart
       .selectAll(".label")
       .data(data)
@@ -100,18 +130,6 @@ const D3 = () => {
       .text((d) => d.dcLow)
       .attr("x", (d) => xScale(d.datetime))
       .attr("y", (d) => 20);
-
-    // Labels for DC Low
-    // chart
-    //   .selectAll(".label")
-    //   .data(data)
-    //   .enter()
-    //   .append("text")
-    //   .text((d) => d.dcHigh)
-    //   .attr("x", (d) => x(d.datetime))
-    //   .attr("y", (d) => CHART_END_Y);
-
-    // create bars for DC High
 
     // Remove bars if needed
     chart.selectAll(".bar").data(data).exit().remove();
