@@ -2,6 +2,7 @@ import { Page } from "../../components";
 import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
 import { generateTradingData } from "./generateTradingData";
+import { select } from "d3";
 
 const D3 = () => {
   const d3Container = useRef(null);
@@ -36,8 +37,6 @@ const D3 = () => {
     const chart = svg.append("g");
 
     // Create axis
-    // const x = d3.scaleTime().range([CHART_START_X, CHART_END_X]);
-    // x.domain(d3.extent(data, (d) => d.datetime));
     const xScale = d3
       .scaleTime()
       .range([CHART_START_Y, CHART_END_X])
@@ -55,6 +54,7 @@ const D3 = () => {
     const xAxis = d3
       .axisBottom(xScale)
       .ticks(5)
+      .tickSize(10)
       .tickFormat(d3.timeFormat("%-I %p"));
 
     svg
@@ -80,13 +80,16 @@ const D3 = () => {
       .attr("y1", CHART_MID_Y)
       .attr("y2", CHART_MID_Y);
 
+    const keys = ["dcLow", "intraday", "dcHigh"];
+
+    // Set colour variations for stacks
     const color = d3
       .scaleOrdinal()
-      .domain(["dcLow", "intraday"])
+      .domain(keys)
       .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
-    const stackedData = d3.stack().keys(["dcLow", "intraday"])(data);
-    console.log(stackedData);
+    // Build stacked data
+    const stackedData = d3.stack().keys(keys)(data);
 
     const groups = chart
       .append("g")
@@ -95,6 +98,7 @@ const D3 = () => {
       .join("g")
       .attr("fill", (d) => color(d));
 
+    // Loop through groups and then sub data and draw bars
     groups
       .selectAll("rect")
       .data((d) => d)
@@ -102,43 +106,44 @@ const D3 = () => {
       .attr("rx", 6)
       .attr("stroke-width", 0)
       .attr("x", (d) => xScale(d.data.datetime))
-      .attr("y", (d) => yScale(d[1]))
-      .attr("width", 10)
+      .attr("y", (d) => {
+        if (d[1] < 0) {
+          return CHART_MID_Y;
+        }
+        return yScale(d[1]);
+      })
+      .attr("width", 12)
       .attr("height", (d) => {
         const calculatedHeight = yScale(d[0]) - yScale(d[1]);
+        if (d[1] < 0) {
+          return Math.abs(calculatedHeight);
+        }
+
         if (calculatedHeight === 0) return calculatedHeight;
         return calculatedHeight - 1;
       });
 
-    // Create bars for DC Low WORKING
+    // Create an invisible group that acts as a hover
     // chart
-    //   .selectAll(".bar")
-    //   .data(data, (d) => d.id)
+    //   .selectAll(".hover")
+    //   .data(data)
     //   .enter()
     //   .append("rect")
-    //   .classed("bar", true)
-    //   .attr("fill", "rgb(64, 132, 225)")
-    //   .attr("rx", 4)
-    //   .attr("width", 8)
-    //   .attr("height", (d) => {
-    //     return CHART_MID_Y - yScale(d.dcLow);
-    //   })
     //   .attr("x", (d) => xScale(d.datetime))
-    //   .attr("y", (d) => yScale(d.dcLow));
+    //   .attr("y", CHART_START_Y)
+    //   .attr("height", CHART_HEIGHT)
+    //   .attr("width", (d) => 15)
+    //   //   .attr("stroke", "black")
+    //   .attr("fill", "#a8a8a8")
+    //   .attr("fill-opacity", 0)
+    //   .on("mouseover", (element) =>
+    //     select(element.currentTarget).attr("fill-opacity", 0.2)
+    //   )
+    //   .on("mouseout", (element) =>
+    //     select(element.currentTarget).attr("fill-opacity", 0)
+    //   );
 
-    // Create bars for DC High?
-
-    // Add some labels for DC Low
-    chart
-      .selectAll(".label")
-      .data(data)
-      .enter()
-      .append("text")
-      .text((d) => d.dcLow)
-      .attr("x", (d) => xScale(d.datetime))
-      .attr("y", (d) => 20);
-
-    // Remove bars if needed
+    // Remove bars if needed (Not entirely sure on this one)
     chart.selectAll(".bar").data(data).exit().remove();
   }, []);
 
