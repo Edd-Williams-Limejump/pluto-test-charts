@@ -41,8 +41,7 @@ const D3 = () => {
       .scaleBand()
       .domain(data.map((d) => d.datetime))
       .range([CHART_START_X, CHART_END_X])
-      .paddingOuter(0)
-      .paddingInner(0.2)
+      .padding(0.3)
       .align(0.5);
 
     const yScale = d3
@@ -108,7 +107,7 @@ const D3 = () => {
       .selectAll("rect")
       .data((d) => d)
       .join("rect")
-      .attr("rx", 6)
+      .attr("rx", 4)
       .attr("stroke-width", 0)
       .attr("x", (d) => xScale(d.data.datetime))
       .attr("y", (d) => {
@@ -125,10 +124,10 @@ const D3 = () => {
       .data(data)
       .enter()
       .append("rect")
-      .attr("x", (d) => xScale(d.datetime))
+      .attr("x", (d) => xScale(d.datetime) - 3)
       .attr("y", CHART_START_Y)
       .attr("height", CHART_HEIGHT)
-      .attr("width", (d) => 15)
+      .attr("width", (d) => xScale.bandwidth() + 6)
       //   .attr("stroke", "black")
       .attr("fill", "#a8a8a8")
       .attr("fill-opacity", 0)
