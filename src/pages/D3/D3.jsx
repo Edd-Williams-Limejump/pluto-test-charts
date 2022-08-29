@@ -2,7 +2,6 @@ import { Page } from "../../components";
 import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
 import { generateTradingData } from "./generateTradingData";
-import { select } from "d3";
 
 const D3 = () => {
   const d3Container = useRef(null);
@@ -38,24 +37,25 @@ const D3 = () => {
 
     // Create axis
     const xScale = d3
-      .scaleTime()
+      .scaleBand()
+      .domain(data.map((d) => d.datetime))
       .range([CHART_START_Y, CHART_END_X])
-      .domain([
-        d3.min(data, (d) => d.datetime),
-        d3.max(data, (d) => d.datetime),
-      ]);
+      .paddingOuter(0)
+      .paddingInner(0.2)
+      .align(0.5);
 
     const yScale = d3
       .scaleLinear()
-      .range([CHART_START_X, CHART_END_Y])
-      .domain([15, -15]);
+      .domain([15, -15])
+      .range([CHART_START_X, CHART_END_Y]);
 
     // Draw X Axis
     const xAxis = d3
       .axisBottom(xScale)
-      .ticks(5)
-      .tickSize(10)
-      .tickFormat(d3.timeFormat("%-I %p"));
+      .tickFormat(d3.timeFormat("%-I %p"))
+      .tickSizeInner(0)
+      .tickPadding(6)
+      .tickValues(xScale.domain().filter((d, i) => !(i % 6)));
 
     svg
       .append("g")
@@ -81,6 +81,7 @@ const D3 = () => {
       .attr("y2", CHART_MID_Y);
 
     const keys = ["dcLow", "intraday", "dcHigh"];
+    // const keys = ["dcLow", "intraday"];
 
     // Set colour variations for stacks
     const color = d3
@@ -107,20 +108,18 @@ const D3 = () => {
       .attr("stroke-width", 0)
       .attr("x", (d) => xScale(d.data.datetime))
       .attr("y", (d) => {
-        if (d[1] < 0) {
-          return CHART_MID_Y;
-        }
         return yScale(d[1]);
+        // return yScale(Math.min(0, d[1]));
       })
-      .attr("width", 12)
+      .attr("width", xScale.bandwidth() - 3)
       .attr("height", (d) => {
         const calculatedHeight = yScale(d[0]) - yScale(d[1]);
-        if (d[1] < 0) {
-          return Math.abs(calculatedHeight);
-        }
+        // if (d[1] < 0) {
+        //   return Math.abs(calculatedHeight);
+        // }
 
-        if (calculatedHeight === 0) return calculatedHeight;
-        return calculatedHeight - 1;
+        // if (calculatedHeight === 0) return calculatedHeight;
+        return Math.abs(calculatedHeight);
       });
 
     // Create an invisible group that acts as a hover
