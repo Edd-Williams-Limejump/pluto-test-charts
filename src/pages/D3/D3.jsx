@@ -34,14 +34,34 @@ const D3 = () => {
       .attr("height", TOTAL_HEIGHT)
       .style("background-color", "#dcdcdc");
 
-    const chart = svg.append("g");
+    const createAxis = () => {
+      // Draw X Axis
+      const xAxis = d3
+        .axisBottom(xScale)
+        .tickFormat(d3.timeFormat("%-I %p"))
+        .tickSizeInner(0)
+        .tickPadding(6)
+        .tickValues(xScale.domain().filter((d, i) => !(i % 6)));
+      svg
+        .append("g")
+        .attr("transform", `translate(0, ${CHART_END_Y})`)
+        .call(xAxis);
+
+      // Draw Y Axis
+      const yAxis = d3.axisLeft(yScale).ticks(5);
+      svg
+        .append("g")
+        .attr("transform", `translate(${CHART_START_X}, 0)`)
+        .call(yAxis);
+    };
 
     // Create axis
     const xScale = d3
       .scaleBand()
       .domain(data.map((d) => d.datetime))
+      .paddingInner(0.02)
+      .paddingOuter(0.02)
       .range([CHART_START_X, CHART_END_X])
-      .padding(0.3)
       .align(0.5);
 
     const yScale = d3
@@ -49,36 +69,19 @@ const D3 = () => {
       .domain([15, -15])
       .range([CHART_START_Y, CHART_END_Y]);
 
-    // Draw X Axis
-    const xAxis = d3
-      .axisBottom(xScale)
-      .tickFormat(d3.timeFormat("%-I %p"))
-      .tickSizeInner(0)
-      .tickPadding(6)
-      .tickValues(xScale.domain().filter((d, i) => !(i % 6)));
+    // Create chart group
+    const chart = svg.append("g").classed("chart", true);
 
-    svg
-      .append("g")
-      .attr("transform", `translate(0, ${CHART_END_Y})`)
-      .call(xAxis);
-
-    // Draw Y Axis
-    const yAxis = d3.axisLeft(yScale).ticks(5);
-
-    svg
-      .append("g")
-      .attr("transform", `translate(${CHART_START_X}, 0)`)
-      .call(yAxis);
-
-    // Create midpoint line
-    chart
-      .append("line")
-      .style("stroke", "black")
-      .style("stroke-width", 1)
-      .attr("x1", CHART_START_X)
-      .attr("x2", CHART_WIDTH + 100)
-      .attr("y1", CHART_MID_Y)
-      .attr("y2", CHART_MID_Y);
+    const createMidPointLine = (chart) => {
+      chart
+        .append("line")
+        .style("stroke", "black")
+        .style("stroke-width", 1)
+        .attr("x1", CHART_START_X)
+        .attr("x2", CHART_END_X)
+        .attr("y1", CHART_MID_Y + 0.5 + "px")
+        .attr("y2", CHART_MID_Y + 0.5 + "px");
+    };
 
     const keys = ["dcLow", "intraday", "dcHigh"];
     // const keys = ["dcLow", "intraday"];
@@ -89,38 +92,80 @@ const D3 = () => {
       .domain(keys)
       .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
-    // Build stacked data
-    const stackedData = d3.stack().keys(keys).offset(d3.stackOffsetDiverging)(
-      data
-    );
+    const createHoverBars = (chart, data) => {
+      chart
+        .selectAll("mybar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d) => xScale(d.datetime))
+        .attr("y", CHART_START_Y)
+        .attr("width", xScale.bandwidth())
+        .attr("height", CHART_HEIGHT)
+        .attr("fill", "#69b3a2")
+        .attr("fill-opacity", 0)
+        .on("mouseover", (event, data) => {
+          select(event.currentTarget).attr("fill-opacity", 0.2);
+          console.log(data);
+          // Handle showing the tooltip and pass in the data!
+        })
+        .on("mouseout", (event) => {
+          select(event.currentTarget).attr("fill-opacity", 0);
+        });
+    };
 
-    const groups = chart
-      .append("g")
-      .selectAll("g")
-      .data(stackedData)
-      .join("g")
-      .attr("fill", (d) => color(d));
+    const createStackedBars = (chart, data) => {
+      const stackGenerator = d3
+        .stack()
+        .keys(keys)
+        .offset(0.1)
+        .offset(d3.stackOffsetDiverging);
 
-    console.log(groups);
+      const stackedData = stackGenerator(data);
 
-    // Initial Way of creating groups
-    groups
-      .selectAll("rect")
-      .data((d) => {
-        console.log(d);
-        return d;
-      })
-      .join("rect")
-      .attr("rx", 2)
-      .attr("stroke-width", 0)
-      .attr("x", (d) => xScale(d.data.datetime))
-      .attr("y", (d) => {
-        return yScale(Math.max(0, d[1]));
-      })
-      .attr("width", xScale.bandwidth())
-      .attr("height", (d) => {
-        return yScale(d[0]) - yScale(d[1]);
-      });
+      const groups = chart
+        .selectAll("g")
+        .data(stackedData)
+        .join("g")
+        .attr("fill", (d) => color(d))
+        .classed("stack-key-container", true);
+
+      groups
+        .selectAll("rect")
+        .data((d) => d)
+        .join("rect");
+
+      groups
+        .selectAll("rect")
+        .data((d) => d)
+        .join("rect")
+        .attr("rx", 2)
+        .attr("stroke-width", 0)
+        .attr("x", (d) => xScale(d.data.datetime))
+        .attr("y", (d) => {
+          const yPos = yScale(Math.max(0, d[1]));
+
+          // Adds "padding" below 0 baseline
+          if (yPos >= CHART_MID_Y) {
+            return yPos + 2;
+          }
+
+          return yScale(Math.max(0, d[1]));
+        })
+        .attr("width", xScale.bandwidth())
+        .attr("height", (d) => {
+          // Adds minimal space between bars
+          return yScale(d[0]) - yScale(d[1]) - 1;
+        });
+    };
+
+    // Functions to build chart
+    createAxis(chart);
+    createStackedBars(chart, data);
+    createMidPointLine(chart);
+    // createHoverBars(chart, data);
+
+    // // Build stacked data
 
     // const tooltip = d3
     //   .select(`#d3-container`)
