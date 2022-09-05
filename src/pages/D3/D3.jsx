@@ -6,7 +6,7 @@ import { select } from "d3";
 
 const D3 = () => {
   const d3Container = useRef(null);
-  const [data, setData] = useState(generateTradingData(48, new Date()));
+  const [data, setData] = useState(generateTradingData(10, new Date()));
 
   const margin = { top: 35, right: 35, bottom: 35, left: 35 };
 
@@ -90,7 +90,6 @@ const D3 = () => {
       .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
     // Build stacked data
-    // THIS WAS THE LINE I NEEDED. STACK OFFSETDIVERGING!
     const stackedData = d3.stack().keys(keys).offset(d3.stackOffsetDiverging)(
       data
     );
@@ -102,12 +101,17 @@ const D3 = () => {
       .join("g")
       .attr("fill", (d) => color(d));
 
-    // Loop through groups and then sub data and draw bars
+    console.log(groups);
+
+    // Initial Way of creating groups
     groups
       .selectAll("rect")
-      .data((d) => d)
+      .data((d) => {
+        console.log(d);
+        return d;
+      })
       .join("rect")
-      .attr("rx", 4)
+      .attr("rx", 2)
       .attr("stroke-width", 0)
       .attr("x", (d) => xScale(d.data.datetime))
       .attr("y", (d) => {
@@ -118,43 +122,47 @@ const D3 = () => {
         return yScale(d[0]) - yScale(d[1]);
       });
 
-    const tooltip = d3
-      .select(`#d3-container`)
-      .append("div")
-      .style("background-color", "rgba(117,117,117,0.9")
-      .style("position", "absolute")
-      .style("width", "300px")
-      .style("height", "200px")
-      .style("visibility", "hidden");
+    // const tooltip = d3
+    //   .select(`#d3-container`)
+    //   .append("div")
+    //   .style("background-color", "rgba(117,117,117,0.9")
+    //   .style("position", "absolute")
+    //   .style("width", "300px")
+    //   .style("height", "200px")
+    //   .style("visibility", "hidden");
 
     // Create an invisible group that acts as a hover
-    chart
-      .selectAll(".hover")
-      .data(data)
-      .enter()
-      .append("rect")
-      .attr("x", (d) => xScale(d.datetime) - 3)
-      .attr("y", CHART_START_Y)
-      .attr("height", CHART_HEIGHT)
-      .attr("width", (d) => xScale.bandwidth() + 6)
-      .attr("fill", "#a8a8a8")
-      .attr("fill-opacity", 0)
-      .on("mouseover", (event) => {
-        // console.log(event);
-        select(event.currentTarget).attr("fill-opacity", 0.2);
-        tooltip.style("visibility", "visible");
-        tooltip.style("top", "25%");
+    // Rather than doing it this way:
+    //    - I need to create a group of all the bars
+    //    - Then I can pass in the data for that group
 
-        if (event.offsetX > 500) {
-          tooltip.style("left", event.offsetX - 320 + "px");
-        } else {
-          tooltip.style("left", event.offsetX + 20 + "px");
-        }
-      })
-      .on("mouseout", (element) => {
-        tooltip.style("visibility", "hidden");
-        select(element.currentTarget).attr("fill-opacity", 0);
-      });
+    // chart
+    //   .selectAll(".hover")
+    //   .data(data)
+    //   .enter()
+    //   .append("rect")
+    //   .attr("x", (d) => xScale(d.datetime) - 3)
+    //   .attr("y", CHART_START_Y)
+    //   .attr("height", CHART_HEIGHT)
+    //   .attr("width", (d) => xScale.bandwidth() + 6)
+    //   .attr("fill", "#a8a8a8")
+    //   .attr("fill-opacity", 0)
+    //   .on("mouseover", (event) => {
+    //     // console.log(event);
+    //     select(event.currentTarget).attr("fill-opacity", 0.2);
+    //     tooltip.style("visibility", "visible");
+    //     tooltip.style("top", "25%");
+
+    //     if (event.offsetX > 500) {
+    //       tooltip.style("left", event.offsetX - 320 + "px");
+    //     } else {
+    //       tooltip.style("left", event.offsetX + 20 + "px");
+    //     }
+    //   })
+    //   .on("mouseout", (element) => {
+    //     tooltip.style("visibility", "hidden");
+    //     select(element.currentTarget).attr("fill-opacity", 0);
+    //   });
 
     // Remove bars if needed (Not entirely sure on this one)
     chart.selectAll(".bar").data(data).exit().remove();
