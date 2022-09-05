@@ -1,5 +1,6 @@
 import { randomIntFromInterval } from "../../generateTimeData";
 import add from "date-fns/add";
+import format from "date-fns/format";
 
 function roundMinutes(date) {
   date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
@@ -31,4 +32,14 @@ export const generateTradingData = (length, startDate = new Date()) => {
   }
 
   return timeSeries;
+};
+
+export const getMinValue = (obj) => {
+  const arr = Object.values(obj);
+  return Math.min(arr);
+};
+
+export const getMaxValue = (obj) => {
+  const arr = Object.values(obj);
+  return Math.max(arr);
 };
