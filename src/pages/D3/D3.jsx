@@ -5,26 +5,27 @@ import { generateTradingData, getMinValue } from "./generateTradingData";
 import { select, selectAll } from "d3";
 import { XAxis } from "recharts";
 
+const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+
+const CHART_WIDTH = 600 - margin.left - margin.right;
+const CHART_HEIGHT = 400 - margin.top - margin.bottom;
+
+const CHART_START_X = margin.left;
+const CHART_START_Y = margin.top;
+const CHART_MID_Y = margin.top + CHART_HEIGHT / 2;
+const CHART_MID_X = margin.left + CHART_WIDTH / 2;
+const CHART_END_Y = 400 - margin.bottom;
+const CHART_END_X = margin.left + CHART_WIDTH;
+
+const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
+const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
+
+const BAR_PADDING = 4;
+const TICKS = 24;
+
 const D3 = () => {
   const d3Container = useRef(null);
-  const [data, setData] = useState(generateTradingData(48, new Date()));
-
-  const margin = { top: 30, right: 30, bottom: 30, left: 30 };
-
-  const CHART_WIDTH = 900 - margin.left - margin.right;
-  const CHART_HEIGHT = 400 - margin.top - margin.bottom;
-
-  const CHART_START_X = margin.left;
-  const CHART_START_Y = margin.top;
-  const CHART_MID_Y = margin.top + CHART_HEIGHT / 2;
-  const CHART_MID_X = margin.left + CHART_WIDTH / 2;
-  const CHART_END_Y = 400 - margin.bottom;
-  const CHART_END_X = margin.left + CHART_WIDTH;
-
-  const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
-  const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
-
-  const BAR_PADDING = 4;
+  const [data, setData] = useState(generateTradingData(TICKS, new Date()));
 
   const keys = ["dcLow", "intraday", "dcHigh"];
 
@@ -60,7 +61,7 @@ const D3 = () => {
       const xAxis = d3
         .axisBottom(xScale)
         .tickSizeOuter(0)
-        .ticks(48)
+        .ticks(TICKS)
         // Creates grid line
         .tickSizeInner(-CHART_HEIGHT)
         .tickFormat((d, i) => {
@@ -113,19 +114,41 @@ const D3 = () => {
       // These are the layers from the keys
       const layers = stackGenerator(data);
 
-      chart
+      const layerRenders = chart
         .selectAll(".layer")
         .data(layers)
         .join("g")
-        .attr("class", "layer")
+        .classed("layer", true)
         .attr("fill", (d) => {
           return COLOR_MAP[d.key];
+        });
+
+      chart
+        .selectAll(".hover-overlay")
+        .classed("hover-overlay", true)
+        .data(data)
+        .join("rect")
+        .attr("fill", "purple")
+        .attr("fill-opacity", 0)
+        .attr("y", CHART_START_Y)
+        .attr("x", (d) => xScale(d.datetime))
+        .attr("height", CHART_HEIGHT)
+        .attr("width", CHART_WIDTH / TICKS)
+        .on("mouseover", (event, data) => {
+          d3.select(event.target).attr("fill-opacity", 0.2);
         })
-        .selectAll("rect")
+        .on("mouseout", (event, data) => {
+          d3.select(event.target).attr("fill-opacity", 0);
+        });
+
+      // Draw Bars
+      layerRenders
+        .selectAll(".bar")
         .data((d) => d)
         .join("rect")
+        .classed("bar", true)
         .attr("rx", 2)
-        .attr("width", CHART_WIDTH / 48 - BAR_PADDING)
+        .attr("width", CHART_WIDTH / TICKS - BAR_PADDING)
         .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
         .attr("x", (d) => xScale(d.data.datetime) + BAR_PADDING / 2)
         .attr("y", (d) => yScale(d[1]));
