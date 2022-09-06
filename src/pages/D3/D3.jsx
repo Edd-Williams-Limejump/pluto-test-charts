@@ -1,9 +1,8 @@
 import { Page } from "../../components";
-import React, { useState, useRef, useEffect, useId } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
-import { generateTradingData, getMinValue } from "./generateTradingData";
-import { select, selectAll } from "d3";
-import { XAxis } from "recharts";
+import { generateTradingData } from "./generateTradingData";
+import { add } from "date-fns";
 
 const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
@@ -21,11 +20,13 @@ const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
 const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
 
 const BAR_PADDING = 4;
-const TICKS = 24;
+const X_TICKS = 24;
+const Y_TICKS = 7;
+const TICK_DURATION = 30;
 
 const D3 = () => {
   const d3Container = useRef(null);
-  const [data, setData] = useState(generateTradingData(TICKS, new Date()));
+  const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
 
   const keys = ["dcLow", "intraday", "dcHigh"];
 
@@ -34,8 +35,6 @@ const D3 = () => {
     dcHigh: "red",
     intraday: "black",
   };
-
-  console.log(data);
 
   useEffect(() => {
     if (data.current === data) return;
@@ -46,24 +45,21 @@ const D3 = () => {
       .attr("height", TOTAL_HEIGHT)
       .style("background-color", "#dcdcdc");
 
-    const chart = svg.append("g").classed("chart", true);
-
     const createAxis = () => {
       // Build Scales
       const xScale = d3.scaleTime().range([CHART_START_X, CHART_END_X]);
       const yScale = d3.scaleLinear().range([CHART_END_Y, CHART_START_Y]);
 
+      const [min, max] = d3.extent(data, (d) => new Date(d.datetime));
       // Set Domain boundaries
-      xScale.domain(d3.extent(data, (d) => new Date(d.datetime)));
+      xScale.domain([min, add(max, { minutes: TICK_DURATION })]);
       yScale.domain([-15, 15]);
 
       // Define axis
       const xAxis = d3
         .axisBottom(xScale)
         .tickSizeOuter(0)
-        .ticks(TICKS)
-        // Creates grid line
-        .tickSizeInner(-CHART_HEIGHT)
+        .ticks(X_TICKS)
         .tickFormat((d, i) => {
           return i % 3 == 0 ? d3.timeFormat("%-I %-p")(d) : " ";
         });
@@ -71,9 +67,7 @@ const D3 = () => {
       const yAxis = d3
         .axisLeft(yScale)
         .tickSizeOuter(0)
-        // Creates grid line
-        .tickSizeInner(-CHART_WIDTH)
-        .ticks(7)
+        .ticks(Y_TICKS)
         .tickFormat((d, i) => {
           return i % 5 == 0 ? d : " ";
         });
@@ -94,8 +88,50 @@ const D3 = () => {
       return { xAxis, xScale, yAxis, yScale };
     };
 
+    const createGrid = (xScale, yScale) => {
+      // Create X lines
+      svg
+        .append("g")
+        .classed("vertical-grid-container", true)
+        .selectAll("line.vertical-grid")
+        .data(xScale.ticks(X_TICKS - 1))
+        .enter()
+        .append("line")
+        .classed("vertical-grid", true)
+        .attr("x1", (d) => xScale(d))
+        .attr("x2", (d) => xScale(d))
+        .attr("y1", CHART_START_Y)
+        .attr("y2", CHART_END_Y)
+        .attr("fill", "none")
+        .attr("shape-rendering", "crispEdges")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px");
+
+      // Create Y lines
+      svg
+        .append("g")
+        .classed("horizontal-grid-container", true)
+        .selectAll("line.horizontal-grid")
+        .data(yScale.ticks(Y_TICKS))
+        .enter()
+        .append("line")
+        .classed("horizontal-grid", true)
+        .attr("x1", CHART_START_X)
+        .attr("x2", CHART_END_X)
+        .attr("y1", (d) => {
+          return yScale(d);
+        })
+        .attr("y2", (d) => {
+          return yScale(d);
+        })
+        .attr("fill", "none")
+        .attr("shape-rendering", "crispEdges")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px");
+    };
+
     const createMidPointLine = () => {
-      chart
+      svg
         .append("line")
         .style("stroke", "black")
         .style("stroke-width", 1)
@@ -105,7 +141,7 @@ const D3 = () => {
         .attr("y2", CHART_MID_Y + 0.5 + "px");
     };
 
-    const createStackedBars = () => {
+    const createStackedBars = (xScale, yScale) => {
       const stackGenerator = d3
         .stack()
         .offset(d3.stackOffsetDiverging)
@@ -114,6 +150,7 @@ const D3 = () => {
       // These are the layers from the keys
       const layers = stackGenerator(data);
 
+      // Give each layer a color using the map
       const layerRenders = chart
         .selectAll(".layer")
         .data(layers)
@@ -123,6 +160,7 @@ const D3 = () => {
           return COLOR_MAP[d.key];
         });
 
+      // Draw hover bars (Add Tooltip functionality)
       chart
         .selectAll(".hover-overlay")
         .classed("hover-overlay", true)
@@ -133,7 +171,7 @@ const D3 = () => {
         .attr("y", CHART_START_Y)
         .attr("x", (d) => xScale(d.datetime))
         .attr("height", CHART_HEIGHT)
-        .attr("width", CHART_WIDTH / TICKS)
+        .attr("width", CHART_WIDTH / X_TICKS)
         .on("mouseover", (event, data) => {
           d3.select(event.target).attr("fill-opacity", 0.2);
         })
@@ -147,26 +185,24 @@ const D3 = () => {
         .data((d) => d)
         .join("rect")
         .classed("bar", true)
-        .attr("rx", 2)
-        .attr("width", CHART_WIDTH / TICKS - BAR_PADDING)
+        .attr("shape-rendering", "crispEdges")
+        .attr("rx", 8)
+        .attr("width", CHART_WIDTH / X_TICKS - BAR_PADDING)
         .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
         .attr("x", (d) => xScale(d.data.datetime) + BAR_PADDING / 2)
         .attr("y", (d) => yScale(d[1]));
     };
 
-    // Set colour variations for stacks
-    const color = d3
-      .scaleOrdinal()
-      .domain(keys)
-      .range(["#e41a1c", "#377eb8", "#4daf4a"]);
-
     // Remove bars if needed (Not entirely sure on this one)
-    chart.selectAll(".bar").data(data).exit().remove();
+    // chart.selectAll(".bar").data(data).exit().remove();
 
+    // Setup Axis
     const { xAxis, xScale, yAxis, yScale } = createAxis();
+    createGrid(xScale, yScale);
     createMidPointLine();
 
-    createStackedBars();
+    const chart = svg.append("g").classed("chart", true);
+    createStackedBars(xScale, yScale);
   }, [data]);
 
   return (
