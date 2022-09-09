@@ -24,6 +24,9 @@ const Nav = () => {
         <li>
           <Link to="plot">Plot</Link>
         </li>
+        <li>
+          <Link to="custom">Custom</Link>
+        </li>
       </ul>
     </nav>
   );

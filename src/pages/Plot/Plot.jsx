@@ -2,8 +2,7 @@ import * as Plot from "@observablehq/plot";
 import * as d3 from "d3";
 import { add, addHours, endOfYesterday, subHours } from "date-fns";
 import { PlotFigure } from "plot-react";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Page } from "../../components";
 import { generateTradingData } from "../D3/generateTradingData";
 
@@ -73,17 +72,11 @@ const PlotChart = () => {
 
 export default PlotChart;
 
-useEffect(() => {
-  createAxis;
-  createMiodpointLine;
-}, []);
+// useEffect(() => {
+//   createAxis;
+//   createMiodpointLine;
+// }, []);
 
-useEffect(() => {
-  creaetStadkedBars();
-}, [data]);
-
-enter;
-update;
-exit((selection) => {
-  selection.selectAll(".bar").exit().remove();
-});
+// useEffect(() => {
+//   creaetStadkedBars();
+// }, [data]);

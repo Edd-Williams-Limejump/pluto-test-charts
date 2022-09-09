@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ChartJs, D3, Plot, ReactCharts, ReCharts } from "./pages";
+import { ChartJs, Custom, D3, Plot, ReactCharts, ReCharts } from "./pages";
 import { Nav, Page } from "./components";
 
 import "./App.css";
@@ -34,6 +34,7 @@ function App() {
         <Route path="/chartjs" element={<ChartJs />} />
         <Route path="/d3" element={<D3 />} />
         <Route path="/plot" element={<Plot />} />
+        <Route path="/custom" element={<Custom />} />
       </Routes>
     </Router>
   );
