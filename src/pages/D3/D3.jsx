@@ -19,7 +19,7 @@ const CHART_END_X = margin.left + CHART_WIDTH;
 const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
 const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
 
-const BAR_PADDING = 4;
+const BAR_PADDING = 8;
 const X_TICKS = 24;
 const Y_TICKS = 7;
 const TICK_DURATION = 30;
@@ -31,9 +31,9 @@ const D3 = () => {
   const keys = ["dcLow", "intraday", "dcHigh"];
 
   const COLOR_MAP = {
-    dcLow: "blue",
-    dcHigh: "red",
-    intraday: "black",
+    dcLow: "rgb(191,101,178)",
+    dcHigh: "rgb(1,205,79)",
+    intraday: "rgb(137,192,238)",
   };
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const D3 = () => {
       .select(d3Container.current)
       .attr("width", TOTAL_WIDTH)
       .attr("height", TOTAL_HEIGHT)
-      .style("background-color", "#dcdcdc");
+      .style("background-color", "rgb(241,241,241)");
 
     const createAxis = () => {
       // Build Scales
@@ -59,30 +59,24 @@ const D3 = () => {
       const xAxis = d3
         .axisBottom(xScale)
         .tickSizeOuter(0)
-        .ticks(X_TICKS)
-        .tickFormat((d, i) => {
-          return i % 3 == 0 ? d3.timeFormat("%-I %-p")(d) : " ";
-        });
+        .ticks(d3.timeMinute.every(60))
+        .tickFormat(d3.timeFormat("%-I %-p"));
 
-      const yAxis = d3
-        .axisLeft(yScale)
-        .tickSizeOuter(0)
-        .ticks(Y_TICKS)
-        .tickFormat((d, i) => {
-          return i % 5 == 0 ? d : " ";
-        });
+      const yAxis = d3.axisLeft(yScale).tickSizeOuter(0).ticks(Y_TICKS);
 
       // Append to Chart
       svg
         .append("g")
         .classed("xAxis", true)
         .attr("transform", `translate(0, ${CHART_END_Y})`)
+        .style("font-family", "Roboto")
         .call(xAxis);
 
       svg
         .append("g")
         .classed("yAxis", true)
         .attr("transform", `translate(${CHART_START_X}, 0)`)
+        .style("font-family", "Roboto")
         .call(yAxis);
 
       return { xAxis, xScale, yAxis, yScale };
@@ -100,12 +94,13 @@ const D3 = () => {
         .classed("vertical-grid", true)
         .attr("x1", (d) => xScale(d))
         .attr("x2", (d) => xScale(d))
-        .attr("y1", CHART_START_Y)
+        .attr("y1", CHART_START_Y - 10)
         .attr("y2", CHART_END_Y)
         .attr("fill", "none")
         .attr("shape-rendering", "crispEdges")
         .attr("stroke", "black")
-        .attr("stroke-width", "1px");
+        .attr("stroke-width", "1px")
+        .attr("stroke-opacity", 0.2);
 
       // Create Y lines
       svg
@@ -117,7 +112,7 @@ const D3 = () => {
         .append("line")
         .classed("horizontal-grid", true)
         .attr("x1", CHART_START_X)
-        .attr("x2", CHART_END_X)
+        .attr("x2", CHART_END_X + 10)
         .attr("y1", (d) => {
           return yScale(d);
         })
@@ -203,6 +198,10 @@ const D3 = () => {
 
     const chart = svg.append("g").classed("chart", true);
     createStackedBars(xScale, yScale);
+
+    return () => {
+      d3.select(d3Container.current).selectAll("*").remove();
+    };
   }, [data]);
 
   return (
