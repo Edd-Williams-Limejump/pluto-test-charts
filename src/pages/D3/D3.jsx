@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
 import { generateTradingData } from "./generateTradingData";
 import { add } from "date-fns";
+import { da } from "date-fns/locale";
 
 const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
@@ -19,7 +20,7 @@ const CHART_END_X = margin.left + CHART_WIDTH;
 const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
 const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
 
-const BAR_PADDING = 8;
+const BAR_PADDING = 4;
 const X_TICKS = 24;
 const Y_TICKS = 7;
 const TICK_DURATION = 30;
@@ -28,7 +29,10 @@ const D3 = () => {
   const d3Container = useRef(null);
   const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
 
+  console.log(data);
+
   const keys = ["dcLow", "intraday", "dcHigh"];
+  // const keys = ["dcLow", "dcHigh"];
 
   const COLOR_MAP = {
     dcLow: "rgb(191,101,178)",
@@ -174,18 +178,70 @@ const D3 = () => {
           d3.select(event.target).attr("fill-opacity", 0);
         });
 
+      let allLayersData;
+
       // Draw Bars
       layerRenders
         .selectAll(".bar")
-        .data((d) => d)
+        .data((d) => {
+          // Add key to the data binding to use later
+          allLayersData = d.map((dataPoint) => ({
+            ...dataPoint,
+            data: { ...dataPoint.data, key: d.key },
+          }));
+          return allLayersData;
+        })
         .join("rect")
         .classed("bar", true)
         .attr("shape-rendering", "crispEdges")
         .attr("rx", 8)
-        .attr("width", CHART_WIDTH / X_TICKS - BAR_PADDING)
-        .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+        .attr("width", (d, i) => {
+          console.log(allLayersData[i]);
+
+          // Can't figure this bit out.
+          // I want to be able to expand the bar if the next one is the same y position and height
+
+          // Accounts for last item
+          if (!allLayersData[i + 1]) return CHART_WIDTH / X_TICKS - BAR_PADDING;
+
+          if (allLayersData[i][0] === allLayersData[i][1])
+            return (CHART_WIDTH / X_TICKS - BAR_PADDING) * 2;
+
+          // const currentY = allLayersData[i][1];
+          // const nextY = allLayersData[i + 1][1];
+
+          // const currentHeight =
+          //   yScale(allLayersData[i][0]) - yScale(allLayersData[i][1]);
+          // const nextHeight =
+          //   yScale(allLayersData[i + 1][0]) - yScale(allLayersData[i + 1][1]);
+
+          // // console.log({ currentY, nextY, currentHeight, nextHeight });
+
+          // if (currentHeight === nextHeight && currentY === nextY) {
+          //   // console.log("matching", allLayersData[i], allLayersData[i + 1]);
+          //   return (CHART_WIDTH / X_TICKS) * 2 - BAR_PADDING;
+          // } else {
+          //   return CHART_WIDTH / X_TICKS - BAR_PADDING;
+          // }
+          return CHART_WIDTH / X_TICKS - BAR_PADDING;
+        })
+        .attr("height", (d) => {
+          const calculatedHeight = yScale(d[0]) - yScale(d[1]);
+
+          const yPos = yScale(d[1]);
+          if (yPos === CHART_MID_Y) {
+            return calculatedHeight - 2;
+          }
+          return calculatedHeight - 4;
+        })
         .attr("x", (d) => xScale(d.data.datetime) + BAR_PADDING / 2)
-        .attr("y", (d) => yScale(d[1]));
+        .attr("y", (d) => {
+          const yPos = yScale(d[1]);
+          // if (yPos === CHART_MID_Y) {
+          //   return yPos + 2;
+          // }
+          return yPos + 2;
+        });
     };
 
     // Remove bars if needed (Not entirely sure on this one)
