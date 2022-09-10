@@ -21,18 +21,19 @@ const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
 const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
 
 const BAR_PADDING = 4;
-const X_TICKS = 24;
+const X_TICKS = 8;
 const Y_TICKS = 7;
 const TICK_DURATION = 30;
 
 const D3 = () => {
   const d3Container = useRef(null);
   const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
+  // const [data, ,] = useState(generateTradingData(8, new Date()));
 
-  console.log(data);
-
-  const keys = ["dcLow", "intraday", "dcHigh"];
-  // const keys = ["dcLow", "dcHigh"];
+  // const keys = ["dcLow", "intraday", "dcHigh"];
+  // const keys = ["dcLow"];
+  const keys = ["dcHigh"];
+  // const keys = ["intraday"];
 
   const COLOR_MAP = {
     dcLow: "rgb(191,101,178)",
@@ -140,6 +141,86 @@ const D3 = () => {
         .attr("y2", CHART_MID_Y + 0.5 + "px");
     };
 
+    const calculateHeight = (d) => {
+      const calculatedHeight = yScale(d[0]) - yScale(d[1]);
+
+      if (calculatedHeight === 0) return calculatedHeight;
+
+      const yPos = yScale(d[1]);
+      if (yPos === CHART_MID_Y) {
+        return calculatedHeight - 2;
+      }
+      return calculatedHeight - 4;
+    };
+
+    const calculateYPos = (d) => {
+      const yPos = yScale(d[1]);
+      if (yPos === CHART_MID_Y) {
+        return yPos + 2;
+      }
+      return yPos + 2;
+    };
+
+    let allLayersData;
+
+    const calculateNeighbourData = (index) => {
+      const calculated = {
+        previous: {
+          height:
+            index > 0 ? calculateHeight(allLayersData[index - 1]) : undefined,
+          y: index > 0 ? calculateYPos(allLayersData[index - 1]) : undefined,
+        },
+        current: {
+          height: calculateHeight(allLayersData[index]),
+          y: calculateYPos(allLayersData[index]),
+        },
+        next: {
+          height:
+            index + 1 === allLayersData.length
+              ? undefined
+              : calculateHeight(allLayersData[index + 1]),
+          y:
+            index + 1 === allLayersData.length
+              ? undefined
+              : calculateYPos(allLayersData[index + 1]),
+        },
+      };
+
+      calculated.current["sameAsPrevious"] =
+        calculated.previous.height === calculated.current.height &&
+        calculated.previous.y === calculated.current.y;
+
+      calculated.current["sameAsNext"] =
+        calculated.next.height === calculated.current.height &&
+        calculated.next.y === calculated.current.y;
+
+      return calculated;
+    };
+
+    const calculateWidth = (index) => {
+      const baseBarWidth = CHART_WIDTH / X_TICKS;
+
+      const neighbours = calculateNeighbourData(index);
+      // Set width to 0 if same as the alst
+      if (neighbours.current.sameAsPrevious) return 0;
+
+      // Extend width to fill space
+      let width = baseBarWidth;
+      // Count how many of the next matching neighbours there are
+      for (var i = index; i < allLayersData.length - 1; i++) {
+        // Check if the following is the same
+        const { current } = calculateNeighbourData(i);
+
+        console.log(current);
+
+        // if (current.sameAsNext && !current.sameAsPrevious) {
+        //   width += baseBarWidth;
+        // }
+      }
+
+      return width - BAR_PADDING;
+    };
+
     const createStackedBars = (xScale, yScale) => {
       const stackGenerator = d3
         .stack()
@@ -178,8 +259,6 @@ const D3 = () => {
           d3.select(event.target).attr("fill-opacity", 0);
         });
 
-      let allLayersData;
-
       // Draw Bars
       layerRenders
         .selectAll(".bar")
@@ -189,59 +268,17 @@ const D3 = () => {
             ...dataPoint,
             data: { ...dataPoint.data, key: d.key },
           }));
+          console.log(allLayersData);
           return allLayersData;
         })
         .join("rect")
         .classed("bar", true)
         .attr("shape-rendering", "crispEdges")
         .attr("rx", 8)
-        .attr("width", (d, i) => {
-          console.log(allLayersData[i]);
-
-          // Can't figure this bit out.
-          // I want to be able to expand the bar if the next one is the same y position and height
-
-          // Accounts for last item
-          if (!allLayersData[i + 1]) return CHART_WIDTH / X_TICKS - BAR_PADDING;
-
-          if (allLayersData[i][0] === allLayersData[i][1])
-            return (CHART_WIDTH / X_TICKS - BAR_PADDING) * 2;
-
-          // const currentY = allLayersData[i][1];
-          // const nextY = allLayersData[i + 1][1];
-
-          // const currentHeight =
-          //   yScale(allLayersData[i][0]) - yScale(allLayersData[i][1]);
-          // const nextHeight =
-          //   yScale(allLayersData[i + 1][0]) - yScale(allLayersData[i + 1][1]);
-
-          // // console.log({ currentY, nextY, currentHeight, nextHeight });
-
-          // if (currentHeight === nextHeight && currentY === nextY) {
-          //   // console.log("matching", allLayersData[i], allLayersData[i + 1]);
-          //   return (CHART_WIDTH / X_TICKS) * 2 - BAR_PADDING;
-          // } else {
-          //   return CHART_WIDTH / X_TICKS - BAR_PADDING;
-          // }
-          return CHART_WIDTH / X_TICKS - BAR_PADDING;
-        })
-        .attr("height", (d) => {
-          const calculatedHeight = yScale(d[0]) - yScale(d[1]);
-
-          const yPos = yScale(d[1]);
-          if (yPos === CHART_MID_Y) {
-            return calculatedHeight - 2;
-          }
-          return calculatedHeight - 4;
-        })
+        .attr("width", (d, i) => calculateWidth(i))
+        .attr("height", (d) => calculateHeight(d))
         .attr("x", (d) => xScale(d.data.datetime) + BAR_PADDING / 2)
-        .attr("y", (d) => {
-          const yPos = yScale(d[1]);
-          // if (yPos === CHART_MID_Y) {
-          //   return yPos + 2;
-          // }
-          return yPos + 2;
-        });
+        .attr("y", (d) => calculateYPos(d));
     };
 
     // Remove bars if needed (Not entirely sure on this one)

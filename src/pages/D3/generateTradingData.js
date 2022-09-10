@@ -15,7 +15,8 @@ export const generateTimeData = (date, id) => {
     // daHourly: randomIntFromInterval(-5, 0),
     haHHourly: randomIntFromInterval(-1, 0),
     intraday: randomIntFromInterval(0, 3),
-    dcLow: randomIntFromInterval(0, 9),
+    // dcLow: randomIntFromInterval(0, 9),
+    dcLow: 5,
     dcHigh: randomIntFromInterval(-9, 0),
     datetime: new Date(date),
   };
