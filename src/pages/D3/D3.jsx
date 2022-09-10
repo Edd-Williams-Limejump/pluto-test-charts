@@ -204,7 +204,7 @@ const D3 = () => {
 
       const neighbours = calculateNeighbourData(index);
       // Set width to 0 if same as the last
-      if (neighbours.current.sameAsPrevious) return 0;
+      // if (neighbours.current.sameAsPrevious) return 0;
 
       // Extend width to fill space
       let width = baseBarWidth;
@@ -213,11 +213,11 @@ const D3 = () => {
         // Check if the following is the same
         const { current } = calculateNeighbourData(i);
 
-        if (current.sameAsNext) {
-          width += baseBarWidth;
-        } else {
-          break;
-        }
+        // if (current.sameAsNext) {
+        //   width += baseBarWidth;
+        // } else {
+        //   break;
+        // }
       }
 
       return width - BAR_PADDING;
@@ -305,7 +305,15 @@ const D3 = () => {
       <div id="d3-container" style={{ position: "relative" }}>
         <svg className="d3-component" ref={d3Container} />
         {tooltipData && (
-          <div className="tooltip">{JSON.stringify(tooltipData)}</div>
+          <div className="tooltip">
+            <ul>
+              {keys.map((key) => (
+                <li key={`${tooltipData[key].id}-${key}`}>
+                  {tooltipData[key]}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </Page>
