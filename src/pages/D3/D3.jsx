@@ -21,7 +21,7 @@ const TOTAL_WIDTH = CHART_WIDTH + margin.left + margin.right;
 const TOTAL_HEIGHT = CHART_HEIGHT + margin.bottom + margin.top;
 
 const BAR_PADDING = 4;
-const X_TICKS = 8;
+const X_TICKS = 24;
 const Y_TICKS = 7;
 const TICK_DURATION = 30;
 
@@ -216,11 +216,6 @@ const D3 = () => {
         } else {
           break;
         }
-
-        console.log({
-          next: current.sameAsNext,
-          previous: current.sameAsPrevious,
-        });
       }
 
       return width - BAR_PADDING;
