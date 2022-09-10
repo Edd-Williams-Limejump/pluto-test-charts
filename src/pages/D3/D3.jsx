@@ -30,6 +30,8 @@ const D3 = () => {
   const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
   // const [data, ,] = useState(generateTradingData(8, new Date()));
 
+  const [tooltipData, setTooltipData] = useState(undefined);
+
   const keys = ["dcLow", "intraday", "dcHigh"];
   // const keys = ["dcLow"];
   // const keys = ["dcHigh"];
@@ -254,9 +256,11 @@ const D3 = () => {
         .attr("width", CHART_WIDTH / X_TICKS)
         .on("mouseover", (event, data) => {
           d3.select(event.target).attr("fill-opacity", 0.2);
+          setTooltipData(data);
         })
         .on("mouseout", (event, data) => {
           d3.select(event.target).attr("fill-opacity", 0);
+          setTooltipData(undefined);
         });
 
       // Draw Bars
@@ -300,6 +304,9 @@ const D3 = () => {
     <Page title="D3">
       <div id="d3-container" style={{ position: "relative" }}>
         <svg className="d3-component" ref={d3Container} />
+        {tooltipData && (
+          <div className="tooltip">{JSON.stringify(tooltipData)}</div>
+        )}
       </div>
     </Page>
   );
