@@ -30,9 +30,9 @@ const D3 = () => {
   const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
   // const [data, ,] = useState(generateTradingData(8, new Date()));
 
-  // const keys = ["dcLow", "intraday", "dcHigh"];
+  const keys = ["dcLow", "intraday", "dcHigh"];
   // const keys = ["dcLow"];
-  const keys = ["dcHigh"];
+  // const keys = ["dcHigh"];
   // const keys = ["intraday"];
 
   const COLOR_MAP = {
@@ -197,11 +197,11 @@ const D3 = () => {
       return calculated;
     };
 
-    const calculateWidth = (index) => {
+    const calculateWidth = (index, allLayersData) => {
       const baseBarWidth = CHART_WIDTH / X_TICKS;
 
       const neighbours = calculateNeighbourData(index);
-      // Set width to 0 if same as the alst
+      // Set width to 0 if same as the last
       if (neighbours.current.sameAsPrevious) return 0;
 
       // Extend width to fill space
@@ -211,11 +211,16 @@ const D3 = () => {
         // Check if the following is the same
         const { current } = calculateNeighbourData(i);
 
-        console.log(current);
+        if (current.sameAsNext) {
+          width += baseBarWidth;
+        } else {
+          break;
+        }
 
-        // if (current.sameAsNext && !current.sameAsPrevious) {
-        //   width += baseBarWidth;
-        // }
+        console.log({
+          next: current.sameAsNext,
+          previous: current.sameAsPrevious,
+        });
       }
 
       return width - BAR_PADDING;
@@ -268,14 +273,13 @@ const D3 = () => {
             ...dataPoint,
             data: { ...dataPoint.data, key: d.key },
           }));
-          console.log(allLayersData);
           return allLayersData;
         })
         .join("rect")
         .classed("bar", true)
         .attr("shape-rendering", "crispEdges")
         .attr("rx", 8)
-        .attr("width", (d, i) => calculateWidth(i))
+        .attr("width", (d, i) => calculateWidth(i, allLayersData))
         .attr("height", (d) => calculateHeight(d))
         .attr("x", (d) => xScale(d.data.datetime) + BAR_PADDING / 2)
         .attr("y", (d) => calculateYPos(d));
