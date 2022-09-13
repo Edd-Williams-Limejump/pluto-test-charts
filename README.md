@@ -8,6 +8,8 @@
 - ChartJS
 - ReChart
 - ReactCharts
+- D3 (My choice)
+- Plot (d3 successor)
 
 ## To run
 
