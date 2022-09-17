@@ -1,9 +1,10 @@
 import { Page } from "../../components";
 import React, { useState, useRef, useEffect } from "react";
 import * as d3 from "d3";
-import { generateTradingData } from "./generateTradingData";
+import { generateTimeData, generateTradingData } from "./generateTradingData";
 import { add } from "date-fns";
 import { da } from "date-fns/locale";
+import StackedBarChart from "./StackedBarChart";
 
 const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
@@ -25,7 +26,7 @@ const X_TICKS = 24;
 const Y_TICKS = 7;
 const TICK_DURATION = 30;
 
-const D3 = () => {
+const D3Old = () => {
   const d3Container = useRef(null);
   const [data, ,] = useState(generateTradingData(X_TICKS, new Date()));
   // const [data, ,] = useState(generateTradingData(8, new Date()));
@@ -315,6 +316,31 @@ const D3 = () => {
             </ul>
           </div>
         )}
+      </div>
+    </Page>
+  );
+};
+
+const D3 = () => {
+  const [data, setData] = useState(generateTradingData(48, new Date()));
+
+  // Mock a websocket connection with new data every second
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const newData = generateTimeData(data.at(data.length - 1));
+      const newDataArray = [...data];
+      newDataArray.shift();
+      newDataArray.push(newData);
+      setData(newDataArray);
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return (
+    <Page title="D3">
+      <div id="d3-container" style={{ position: "relative" }}>
+        <StackedBarChart data={data} />
       </div>
     </Page>
   );
