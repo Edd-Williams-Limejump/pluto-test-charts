@@ -1,8 +1,10 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ChartJs, Custom, D3, Plot, ReactCharts, ReCharts } from "./pages";
 import { Nav, Page } from "./components";
 
 import "./App.css";
+import Reaviz from "./pages/Reaviz/Reaviz";
 
 const Home = () => (
   <Page title="Home">
@@ -35,6 +37,7 @@ function App() {
         <Route path="/d3" element={<D3 />} />
         <Route path="/plot" element={<Plot />} />
         <Route path="/custom" element={<Custom />} />
+        <Route path="/reaviz" element={<Reaviz />} />
       </Routes>
     </Router>
   );
