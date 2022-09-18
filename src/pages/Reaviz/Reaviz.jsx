@@ -14,6 +14,8 @@ import {
   Gridline,
   TooltipArea,
   ChartTooltip,
+  LinearXAxisTickLine,
+  LinearXAxisTickLabel,
 } from "reaviz";
 import { Page } from "../../components";
 
@@ -47,6 +49,19 @@ const data = [
       },
     ],
   },
+  {
+    key: add(new Date(), { minutes: 60 }),
+    data: [
+      {
+        key: "dcLow",
+        data: 2,
+      },
+      {
+        key: "dcHigh",
+        data: -11,
+      },
+    ],
+  },
 ];
 
 const Reaviz = () => {
@@ -56,9 +71,7 @@ const Reaviz = () => {
   const height = 250;
   const width = 400;
   const hasGuideBar = true;
-  const guide = hasGuideBar ? (
-    <GuideBar fill="black" style={{ height: "50%" }} />
-  ) : null;
+  const guide = hasGuideBar ? <GuideBar fill="black" /> : null;
 
   return (
     <Page title="Reavis">
@@ -69,9 +82,11 @@ const Reaviz = () => {
         margins={0}
         data={data}
         gridlines={<GridlineSeries line={<Gridline direction="all" />} />}
+        centerX={true}
         series={
           <StackedBarSeries
             type="stackedDiverging"
+            padding={0.2}
             bar={[
               <Bar
                 rx={rx}
@@ -110,13 +125,6 @@ const Reaviz = () => {
                 label={<LinearYAxisTickLabel padding={5} />}
               />
             }
-          />
-        }
-        xAxis={
-          <LinearXAxis
-            type="category"
-            position="center"
-            tickSeries={<LinearXAxisTickSeries line={null} label={null} />}
           />
         }
       />
