@@ -55,8 +55,10 @@ const Reaviz = () => {
   const ry = 12;
   const height = 250;
   const width = 400;
-  const hasGuideBar = false;
-  const guide = hasGuideBar ? <GuideBar /> : null;
+  const hasGuideBar = true;
+  const guide = hasGuideBar ? (
+    <GuideBar fill="black" style={{ height: "50%" }} />
+  ) : null;
 
   return (
     <Page title="Reavis">
@@ -66,7 +68,7 @@ const Reaviz = () => {
         height={height}
         margins={0}
         data={data}
-        gridlines={<GridlineSeries line={<Gridline direction="y" />} />}
+        gridlines={<GridlineSeries line={<Gridline direction="all" />} />}
         series={
           <StackedBarSeries
             type="stackedDiverging"
