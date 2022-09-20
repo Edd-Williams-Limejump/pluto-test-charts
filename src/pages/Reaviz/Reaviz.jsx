@@ -18,6 +18,7 @@ import {
   ChartTooltip,
   LinearXAxisTickLine,
   LinearXAxisTickLabel,
+  MarkLine,
 } from "reaviz";
 import { Page } from "../../components";
 import { randomIntFromInterval } from "../../generateTimeData";
@@ -103,15 +104,15 @@ const ReavizContainer = () => {
   return (
     <Page title="Reavis">
       <button onClick={handleAddData}>Add Data</button>
-      <Reaviz data={data} />;
+      <Reaviz data={data} />
     </Page>
   );
 };
 
 const Reaviz = ({ data }) => {
   const padding = 8;
-  const rx = 12;
-  const ry = 12;
+  const rx = 4;
+  const ry = 4;
   const height = 250;
   const width = 400;
   const hasGuideBar = true;
@@ -124,10 +125,14 @@ const Reaviz = ({ data }) => {
       height={height}
       margins={0}
       data={data}
-      gridlines={<GridlineSeries line={<Gridline direction="all" />} />}
+      gridlines={
+        <GridlineSeries line={<Gridline direction="all" />} />
+        // <GridlineSeries line={<Gridline direction="x" centerX />} />,
+      }
       centerX={true}
       series={
         <StackedBarSeries
+          animated={false}
           type="stackedDiverging"
           padding={0.2}
           bar={[
@@ -135,7 +140,9 @@ const Reaviz = ({ data }) => {
               rx={rx}
               ry={ry}
               guide={guide}
-              style={() => ({ fill: "#3f38be" })}
+              style={() => ({
+                fill: "#3f38be",
+              })}
             />,
             <Bar
               rx={rx}
@@ -153,10 +160,23 @@ const Reaviz = ({ data }) => {
                     offset: "5px, 5px",
                   }}
                   content={(data, color) => {
+                    if (!data) return null;
+
+                    console.log(data.data);
+
                     return (
-                      <div style={{ backgroundColor: "grey" }}>
-                        <p>dcLow: {data.dcLow}</p>
-                        <p>dcHigh: {data.dcHigh}</p>
+                      <div
+                        style={{
+                          backgroundColor: "rgba(100, 100, 100, 0.3)",
+                          padding: "8px 12px",
+                        }}
+                      >
+                        {/* <h4>{data?.key}</h4> */}
+                        {data.data.map((d) => (
+                          <p key={d.key}>
+                            {d.key}: {d.value}
+                          </p>
+                        ))}
                       </div>
                     );
                   }}
@@ -177,7 +197,9 @@ const Reaviz = ({ data }) => {
           }
         />
       }
-    />
+    >
+      {/* <MarkLine height={"100%"} pointX={new Date()} /> */}
+    </StackedBarChart>
   );
 };
 
