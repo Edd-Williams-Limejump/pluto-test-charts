@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
 import "./Nav.scss";
@@ -26,6 +27,9 @@ const Nav = () => {
         </li>
         <li>
           <Link to="custom">Custom</Link>
+        </li>
+        <li>
+          <Link to="reaviz">Reaviz</Link>
         </li>
       </ul>
     </nav>
