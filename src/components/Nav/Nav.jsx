@@ -21,6 +21,12 @@ const Nav = () => {
         <li>
           <Link to="d3">D3</Link>
         </li>
+        <li>
+          <Link to="plot">Plot</Link>
+        </li>
+        <li>
+          <Link to="custom">Custom</Link>
+        </li>
       </ul>
     </nav>
   );

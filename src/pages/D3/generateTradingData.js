@@ -1,6 +1,5 @@
 import { randomIntFromInterval } from "../../generateTimeData";
 import add from "date-fns/add";
-import format from "date-fns/format";
 
 function roundMinutes(date) {
   date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
@@ -17,8 +16,8 @@ export const generateTimeData = (date, id) => {
     haHHourly: randomIntFromInterval(-1, 0),
     intraday: randomIntFromInterval(0, 3),
     dcLow: randomIntFromInterval(0, 9),
-    dcHigh: randomIntFromInterval(-9, 0),
-    datetime: date,
+    dcHigh: randomIntFromInterval(-5, 0),
+    datetime: new Date(date),
   };
 };
 
