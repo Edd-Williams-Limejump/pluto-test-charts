@@ -8,7 +8,7 @@ import set from "date-fns/set";
 
 const INIT_DATA = generateTradingData(
   48,
-  set(new Date(), { hours: 23, minutes: 0 })
+  set(new Date(), { hours: 23, minutes: 0, seconds: 0 })
 );
 const INIT_DIMS = { height: 500, width: 800 };
 
@@ -47,7 +47,10 @@ const D3Class = () => {
 
   const refreshData = () => {
     setData(
-      generateTradingData(48, set(new Date(), { hours: 23, minutes: 0 }))
+      generateTradingData(
+        48,
+        set(new Date(), { hours: 23, minutes: 0, seconds: 0 })
+      )
     );
   };
 

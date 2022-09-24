@@ -1,11 +1,10 @@
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
-import { axisBottom, axisLeft } from "d3-axis";
 import add from "date-fns/add";
 import { format, set } from "date-fns";
 
 class StackedChart {
-  margin = { left: 30, top: 30, bottom: 30, right: 30 };
+  margin = { left: 60, top: 30, bottom: 30, right: 30 };
 
   constructor(domNodeCurrent) {
     this.svg = select(domNodeCurrent).append("svg");
@@ -45,22 +44,25 @@ class StackedChart {
       .domain([startTime, endTime])
       .range([0, this.innerWidth]);
 
-    this.yScale = scaleLinear().domain([-15, 15]).range([this.innerHeight, 0]);
+    this.yScale = scaleLinear()
+      .domain([-100, 100])
+      .range([this.innerHeight, 0]);
   };
 
   // third; create axis groups using the following methods.
   createAxes = () => {
-    // this.scaleAxes();
     // Create xAxis
     this.xAxisBottom = this.chart.append("g");
     this.yAxisLeft = this.chart.append("g");
     //   .attr("transform", `translate(0, ${this.innerHeight})`);
 
-    const startDate = set(new Date(), { hours: 23, minutes: 0 });
+    this.startDate = set(new Date(), { hours: 23, minutes: 0 });
+    this.endDate = add(this.startDate, { hours: 24 });
+
     this.xAxisBottom
       .append("line")
-      .attr("x1", this.xScale(startDate))
-      .attr("x2", this.xScale(add(startDate, { hours: 24 })))
+      .attr("x1", this.xScale(this.startDate))
+      .attr("x2", this.xScale(add(this.startDate, { hours: 24 })))
       .attr("y1", this.innerHeight)
       .attr("y2", this.innerHeight)
       .attr("stroke-width", 1)
@@ -68,25 +70,110 @@ class StackedChart {
 
     this.yAxisLeft
       .append("line")
-      .attr("x1", this.xScale(startDate))
-      .attr("x2", this.xScale(startDate))
-      .attr("y1", this.yScale(-15))
-      .attr("y2", this.yScale(15))
+      .attr("x1", this.xScale(this.startDate))
+      .attr("x2", this.xScale(this.startDate))
+      .attr("y1", this.yScale(-100))
+      .attr("y2", this.yScale(100))
       .attr("stroke-width", 1)
       .attr("stroke", "#E4E7ED");
+
+    this.addTicks();
   };
 
-  scaleAxes = () => {
-    this.xAxisBottom = axisBottom()
-      .scale(this.xScale)
-      .tickSize(-this.innerHeight)
-      .tickSizeOuter(0);
-    this.yAxisLeft = axisLeft().scale(this.yScale).tickSize(-this.innerWidth);
+  addTicks = () => {
+    this.addXTimeLabels();
+    this.addXEFALabels();
+    this.addYLabels();
+  };
+
+  addXEFALabels = () => {
+    const tickTimes = [
+      { time: add(this.startDate, { hours: 2 }), text: "EFA 1" },
+      { time: add(this.startDate, { hours: 6 }), text: "EFA 2" },
+      { time: add(this.startDate, { hours: 10 }), text: "EFA 3" },
+      { time: add(this.startDate, { hours: 14 }), text: "EFA 4" },
+      { time: add(this.startDate, { hours: 18 }), text: "EFA 5" },
+      { time: add(this.startDate, { hours: 22 }), text: "EFA 6" },
+    ];
+
+    tickTimes.forEach((t) => {
+      this.xAxisBottom
+        .append("text")
+        .text(t.text)
+        .attr("x", this.xScale(t.time))
+        .attr("y", this.innerHeight + 20)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("fill", "#8F9697");
+    });
+  };
+
+  addXTimeLabels = () => {
+    const tickTimes = [
+      this.startDate,
+      add(this.startDate, { hours: 4 }),
+      add(this.startDate, { hours: 8 }),
+      add(this.startDate, { hours: 12 }),
+      add(this.startDate, { hours: 16 }),
+      add(this.startDate, { hours: 20 }),
+      add(this.startDate, { hours: 24 }),
+    ];
+
+    // Add Time xAxis gridlines
+    tickTimes.forEach((t) => {
+      this.xAxisBottom
+        .append("line")
+        .classed("x-grid-line", true)
+        .attr("x1", this.xScale(t))
+        .attr("x2", this.xScale(t))
+        .attr("y1", 0)
+        .attr("y2", this.innerHeight + 10)
+        .attr("stroke-width", 1)
+        .attr("stroke", "#E4E7ED");
+
+      // Add text label
+      this.xAxisBottom
+        .append("text")
+        .text(format(t, "hbbb"))
+        .attr("x", this.xScale(t))
+        .attr("y", this.innerHeight + 20)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("fill", "#8F9697");
+    });
+  };
+
+  addYLabels = () => {
+    const ticks = [-100, -50, 0, 50, 100];
+    const gridLines = [-100, -75, -50, -25, 0, 25, 50, 75, 100];
+
+    ticks.forEach((t) => {
+      this.yAxisLeft
+        .append("text")
+        .text(`${t} MW`)
+        .attr("x", this.xScale(this.startDate) - 10)
+        .attr("y", () => this.yScale(t))
+        .attr("text-anchor", "end")
+        .attr("font-size", "12px")
+        .attr("fill", "#8F9697");
+    });
+
+    // Add gridlines
+    gridLines.forEach((g) => {
+      this.yAxisLeft
+        .append("line")
+        .classed("y-grid-line", true)
+        .attr("x1", this.xScale(this.startDate))
+        .attr("x2", this.xScale(this.endDate))
+        .attr("y1", this.yScale(g))
+        .attr("y2", this.yScale(g))
+        .attr("stroke-width", 1)
+        .attr("stroke", "#E4E7ED");
+    });
   };
 
   updateData = (data) => {
     this.data = data;
-    console.log(this.data);
 
     this.allCircles = this.chart.selectAll(".myCircle").data(this.data);
     this.allCircles
@@ -104,13 +191,7 @@ class StackedChart {
           .attr("r", 10)
           .attr("cx", (d) => this.xScale(d.datetime))
           .attr("cy", (d) => this.yScale(d.dcLow))
-          .attr("fill", "yellow");
-        enter
-          .append("text")
-          .classed("text", true)
-          .attr("x", (d) => this.xScale(d.datetime))
-          .attr("y", (d) => this.yScale(d.dcLow) - 10)
-          .text((d) => format(d.datetime, "h:m"));
+          .attr("fill", "lightblue");
       },
       (update) => {
         update
