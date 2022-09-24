@@ -23,6 +23,9 @@ const Nav = () => {
           <Link to="d3">D3</Link>
         </li>
         <li>
+          <Link to="d3-class">D3 Class</Link>
+        </li>
+        <li>
           <Link to="plot">Plot</Link>
         </li>
         <li>

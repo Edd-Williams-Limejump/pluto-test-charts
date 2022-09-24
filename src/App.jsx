@@ -5,6 +5,7 @@ import { Nav, Page } from "./components";
 
 import "./App.css";
 import Reaviz from "./pages/Reaviz/Reaviz";
+import D3Class from "./pages/D3-class/D3Class";
 
 const Home = () => (
   <Page title="Home">
@@ -35,6 +36,7 @@ function App() {
         <Route path="/recharts" element={<ReCharts />} />
         <Route path="/chartjs" element={<ChartJs />} />
         <Route path="/d3" element={<D3 />} />
+        <Route path="/d3-class" element={<D3Class />} />
         <Route path="/plot" element={<Plot />} />
         <Route path="/custom" element={<Custom />} />
         <Route path="/reaviz" element={<Reaviz />} />
