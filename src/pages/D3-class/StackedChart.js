@@ -87,32 +87,13 @@ class StackedChart {
       },
       (update) => {
         update
+          .transition()
+          .duration(500)
           .attr("cx", (d) => this.xScale(d.datetime))
           .attr("cy", (d) => this.yScale(d.dcLow));
       },
       (exit) => exit.remove()
     );
-
-    // this.enter();
-  };
-
-  enter = () => {
-    console.log("calling enter", this.allCircles);
-    this.allCircles
-      .enter()
-      .append("circle")
-      .attr("r", 10)
-      .attr("class", "myCircle")
-      .attr("r", 10)
-      .attr("cx", (d) => this.xScale(d.datetime))
-      .attr("cy", (d) => this.yScale(d.dcLow))
-      .attr("fill", "yellow");
-
-    this.exit(); //<---- call this.exit immediately.
-  };
-
-  exit = () => {
-    this.allCircles.exit().remove();
   };
 
   updateDims = (dims) => {};
