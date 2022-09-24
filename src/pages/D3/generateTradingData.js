@@ -23,7 +23,9 @@ export const generateTimeData = (date, id) => {
 
 export const generateTradingData = (length, startDate = new Date()) => {
   const timeSeries = [];
-  let baseDate = roundMinutes(startDate);
+  let baseDate = startDate;
+
+  timeSeries.push(generateTimeData(baseDate, i + 1));
 
   for (var i = 0; i < length; i++) {
     timeSeries.push(generateTimeData(add(baseDate, { minutes: 30 }), i + 1));
