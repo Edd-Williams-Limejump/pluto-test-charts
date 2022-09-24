@@ -6,36 +6,47 @@ import { Page } from "../../components";
 import { generateTradingData } from "../D3/generateTradingData";
 
 const INIT_DATA = generateTradingData(48, new Date());
+const INIT_DIMS = { height: 500, width: 800 };
 
-const D3Class = ({ dims = { height: 500, width: 800 } }) => {
+const D3Class = () => {
   const domNode = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [data, setData] = useState(INIT_DATA);
   const [vizInitialized, setVizInitialized] = useState(false);
 
+  // Effect to deal with adding/removing chart to DOM
   useEffect(() => {
     const canvasChart = new StackedChart(domNode.current);
     setCanvas(canvasChart);
+
+    return () => {
+      // This deals with not having multiple svgs with hot reload
+      canvasChart.remove();
+      setVizInitialized(false);
+    };
   }, []);
 
+  // Effect to deal with initalising
   useEffect(() => {
-    console.log("reinit chart", { canvas });
-    if (canvas && data.length > 1 && dims.width && vizInitialized === false) {
-      canvas.init(data, dims);
+    if (!vizInitialized && canvas && data) {
+      canvas.init(data, INIT_DIMS);
       setVizInitialized(true);
     }
-  }, [canvas, vizInitialized]);
 
+    return () => {
+      console.log("init cleanup being called");
+    };
+  }, [canvas, data]);
+
+  // Effect to deal with updating the data
   useEffect(() => {
-    if (vizInitialized) {
-      console.log("updating data");
-
+    if (vizInitialized && data) {
       canvas.updateData(data);
     }
   }, [data]);
 
   const refreshData = () => {
-    setData(() => generateTradingData(48, new Date()));
+    setData(generateTradingData(48, new Date()));
   };
 
   return (
