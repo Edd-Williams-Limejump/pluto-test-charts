@@ -163,7 +163,7 @@ class StackedChart {
       this.yAxisLeft
         .append("line")
         .classed("y-grid-line", true)
-        .attr("x1", this.xScale(this.startDate))
+        .attr("x1", this.xScale(this.startDate) - 10)
         .attr("x2", this.xScale(this.endDate))
         .attr("y1", this.yScale(g))
         .attr("y2", this.yScale(g))
