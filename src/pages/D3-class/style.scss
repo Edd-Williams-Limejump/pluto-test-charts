@@ -1,0 +1,14 @@
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 12px;
+    color: #606e71;
+  }
+}

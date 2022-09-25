@@ -5,21 +5,21 @@ import { format, set } from "date-fns";
 import { stack, stackOffsetDiverging } from "d3";
 
 class StackedChart {
-  keys = ["dcLow", "dcHigh"];
-  margin = { left: 60, top: 30, bottom: 30, right: 30 };
+  margin = { left: 60, top: 30, bottom: 50, right: 30 };
   colorMap = {
-    dcLow: "rgb(191,101,178)",
-    dcHigh: "rgb(1,205,79)",
+    dcLow: "#BF65B2",
+    dcHigh: "#01CD4F",
     intraday: "rgb(137,192,238)",
   };
 
   constructor(domNodeCurrent) {
-    this.svg = select(domNodeCurrent).append("svg");
-    this.svg.attr("width", "100%").attr("height", "100%");
+    this.svg = select(domNodeCurrent).append("svg").lower();
+    this.svg.attr("width", "100%").attr("height", "85%");
     return this;
   }
 
-  init = (data, dims) => {
+  init = (data, dims, keys) => {
+    this.keys = keys;
     this.setDims(dims); //<-----one
     this.setScales(data); //<-------two
     this.chart = this.svg.append("g");
@@ -30,10 +30,11 @@ class StackedChart {
 
     this.createAxes(); //<-----three
 
-    // Create bar + hovers groups
+    // Create bar + hovers groups only want to call this once
     this.bars = this.chart.append("g").classed("bars", true);
     this.hoverBars = this.chart.append("g").classed("hover-bars", true);
 
+    // Update (Create initial data)
     this.updateData(data);
   };
 
@@ -114,7 +115,7 @@ class StackedChart {
         .attr("x", this.xScale(t.time))
         .attr("y", this.innerHeight + 20)
         .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
+        .attr("font-size", "0px")
         .attr("fill", "#8F9697");
     });
   };
@@ -163,7 +164,7 @@ class StackedChart {
         .append("text")
         .text(`${t} MW`)
         .attr("x", this.xScale(this.startDate) - 10)
-        .attr("y", () => this.yScale(t))
+        .attr("y", () => this.yScale(t) + 5)
         .attr("text-anchor", "end")
         .attr("font-size", "12px")
         .attr("fill", "#8F9697");
@@ -183,8 +184,31 @@ class StackedChart {
     });
   };
 
-  calculateBarWidth = () => {
-    return this.innerWidth / 48;
+  addHoverBars = () => {
+    this.hoverBars
+      .selectAll("g")
+      .data(this.data)
+      .join(
+        (enter) => {
+          enter
+            .append("rect")
+            .attr("height", this.innerHeight)
+            .attr("width", this._calculateBarWidth() + 1)
+            .attr("x", this.xScale(this.startDate))
+            .attr("fill", "grey")
+            .attr("fill-opacity", 0)
+            .attr("x", (d) => this.xScale(d.datetime))
+            .on("mouseover", (event, data) => {
+              console.log(data);
+              select(event.target).attr("fill-opacity", 0.2);
+            })
+            .on("mouseout", (event, data) => {
+              select(event.target).attr("fill-opacity", 0);
+            });
+        },
+        null,
+        (exit) => exit.remove()
+      );
   };
 
   // Creates the bars
@@ -222,7 +246,7 @@ class StackedChart {
             .attr("rx", 4)
             .attr("width", () => {
               // Adds padding at end of bar
-              return this.calculateBarWidth() - 1;
+              return this._calculateBarWidth() - 1;
             }),
 
         null,
@@ -236,37 +260,14 @@ class StackedChart {
       .attr("height", (d) => this.yScale(d[0]) - this.yScale(d[1]));
   };
 
-  addHoverBars = () => {
-    this.hoverBars
-      .selectAll("g")
-      .data(this.data)
-      .join(
-        (enter) => {
-          enter
-            .append("rect")
-            .attr("height", this.innerHeight)
-            .attr("width", this.calculateBarWidth() + 1)
-            .attr("x", this.xScale(this.startDate))
-            .attr("fill", "grey")
-            .attr("fill-opacity", 0)
-            .attr("x", (d) => this.xScale(d.datetime))
-            .on("mouseover", (event, data) => {
-              console.log(data);
-              select(event.target).attr("fill-opacity", 0.2);
-            })
-            .on("mouseout", (event, data) => {
-              select(event.target).attr("fill-opacity", 0);
-            });
-        },
-        null,
-        (exit) => exit.remove()
-      );
-  };
-
   updateDims = (dims) => {};
 
   remove = () => {
     this.svg.remove();
+  };
+
+  _calculateBarWidth = () => {
+    return this.innerWidth / 48;
   };
 }
 

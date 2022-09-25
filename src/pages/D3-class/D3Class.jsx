@@ -6,11 +6,23 @@ import { Page } from "../../components";
 import { generateTradingData } from "../D3/generateTradingData";
 import set from "date-fns/set";
 
+import { ReactComponent as DcLow } from "./legend/dcLow.svg";
+import { ReactComponent as DcHigh } from "./legend/dcHigh.svg";
+
+import "./style.scss";
+
+const LEGEND_ICON_MAPPING = {
+  dcLow: DcLow,
+  dcHigh: DcHigh,
+};
+
 const INIT_DATA = generateTradingData(
   47,
   set(new Date(), { hours: 23, minutes: 0, seconds: 0 })
 );
-const INIT_DIMS = { height: 500, width: 1200 };
+const INIT_DIMS = { height: 500, width: 1000 };
+
+const KEYS = ["dcLow", "dcHigh"];
 
 const D3Class = () => {
   const domNode = useRef(null);
@@ -33,7 +45,7 @@ const D3Class = () => {
   // Effect to deal with initalising
   useEffect(() => {
     if (!vizInitialized && canvas && data) {
-      canvas.init(data, INIT_DIMS);
+      canvas.init(data, INIT_DIMS, KEYS);
       setVizInitialized(true);
     }
   }, [canvas, data]);
@@ -60,12 +72,23 @@ const D3Class = () => {
       <div
         ref={domNode}
         style={{
-          display: "grid",
-          height: INIT_DIMS.height + "px",
+          height: INIT_DIMS.height + 75 + "px",
           width: INIT_DIMS.width + "px",
           boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
         }}
-      />
+      >
+        <div className="legend">
+          {KEYS.map((k) => {
+            const Icon = LEGEND_ICON_MAPPING[k];
+            return (
+              <div className="legend__item" key={k}>
+                <Icon />
+                <p>{k}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </Page>
   );
 };
