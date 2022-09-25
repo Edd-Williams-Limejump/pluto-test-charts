@@ -10,7 +10,7 @@ import { ReactComponent as DcLow } from "./legend/dcLow.svg";
 import { ReactComponent as DcHigh } from "./legend/dcHigh.svg";
 
 import "./style.scss";
-import { format } from "date-fns";
+import { add, format } from "date-fns";
 
 const LEGEND_ICON_MAPPING = {
   dcLow: DcLow,
@@ -98,7 +98,10 @@ const D3Class = () => {
           >
             <div className="tooltip__line">
               <p>{format(tooltipData.datetime, "d LLL y")}</p>
-              <p>time period</p>
+              <p>
+                {format(tooltipData.datetime, "HH:mm")} -
+                {format(add(tooltipData.datetime, { minutes: 30 }), "HH:mm")}
+              </p>
             </div>
             {Object.entries(tooltipData.data).map(([key, value]) => (
               <div className="tooltip__line" key={key}>
