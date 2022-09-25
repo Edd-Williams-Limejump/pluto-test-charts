@@ -217,11 +217,10 @@ class StackedChart {
             // This xScale is starting at far left
             // rather than where the axis are
             .attr("x", (d) => {
-              console.log(this.xScale);
               return this.xScale(d.data.datetime);
             })
             .attr("y", (d) => this.yScale(d[1]))
-            .attr("height", () => this.height - this.yScale(0))
+            .attr("height", () => this.dims.height - this.yScale(0))
             .attr("width", 5),
         null,
         (exit) => exit.remove()
