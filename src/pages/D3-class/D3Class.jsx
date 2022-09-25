@@ -10,7 +10,7 @@ const INIT_DATA = generateTradingData(
   47,
   set(new Date(), { hours: 23, minutes: 0, seconds: 0 })
 );
-const INIT_DIMS = { height: 500, width: 800 };
+const INIT_DIMS = { height: 500, width: 1200 };
 
 const D3Class = () => {
   const domNode = useRef(null);
@@ -61,8 +61,8 @@ const D3Class = () => {
         ref={domNode}
         style={{
           display: "grid",
-          height: "500px",
-          width: "800px",
+          height: INIT_DIMS.height + "px",
+          width: INIT_DIMS.width + "px",
           boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
         }}
       />

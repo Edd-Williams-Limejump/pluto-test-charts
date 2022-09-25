@@ -2,7 +2,7 @@ import { select } from "d3-selection";
 import { scaleLinear, scaleTime } from "d3-scale";
 import add from "date-fns/add";
 import { format, set } from "date-fns";
-import { stack, stackOffsetDiverging, transition } from "d3";
+import { stack, stackOffsetDiverging } from "d3";
 
 class StackedChart {
   keys = ["dcLow", "dcHigh"];
