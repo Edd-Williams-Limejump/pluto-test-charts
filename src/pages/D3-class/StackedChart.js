@@ -187,6 +187,7 @@ class StackedChart {
     return this.innerWidth / 48;
   };
 
+  // Creates the bars
   updateData = (data) => {
     this.data = data;
     this.addHoverBars();
@@ -218,7 +219,7 @@ class StackedChart {
             .append("rect")
             .attr("class", "bar")
             // Base bar attributes
-            .attr("rx", 2)
+            .attr("rx", 4)
             .attr("width", () => {
               // Adds padding at end of bar
               return this.calculateBarWidth() - 1;
@@ -250,6 +251,7 @@ class StackedChart {
             .attr("fill-opacity", 0)
             .attr("x", (d) => this.xScale(d.datetime))
             .on("mouseover", (event, data) => {
+              console.log(data);
               select(event.target).attr("fill-opacity", 0.2);
             })
             .on("mouseout", (event, data) => {
