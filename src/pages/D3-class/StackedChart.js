@@ -181,16 +181,16 @@ class StackedChart {
     });
   };
 
+  calculateBarWidth = () => {
+    return this.innerWidth / 48;
+  };
+
   updateData = (data) => {
     this.data = data;
 
     const stackData = stack().offset(stackOffsetDiverging).keys(this.keys)(
       data
     );
-
-    // Set up transition.
-    const dur = 1000;
-    const t = transition().duration(dur);
 
     this.bars
       .selectAll("g")
@@ -214,22 +214,22 @@ class StackedChart {
           enter
             .append("rect")
             .attr("class", "bar")
-            // Base Styling
-            .attr("rx", 1)
+            // Base bar attributes
+            .attr("rx", 2)
+            .attr("width", () => {
+              // Adds padding at end of bar
+              return this.calculateBarWidth() - 1;
+            }),
 
-            .attr("x", (d) => {
-              return this.xScale(d.data.datetime);
-            })
-            .attr("y", (d) => this.yScale(d[1]))
-            .attr("height", () => this.dims.height - this.yScale(0))
-            .attr("width", 5),
         null,
         (exit) => exit.remove()
       )
-      .attr("x", (d) => this.xScale(d.data.datetime))
+      // Returns the enter + update selection
+      // Computed attributes
+      // Adds padding at start of bar
+      .attr("x", (d) => this.xScale(d.data.datetime) + 1)
       .attr("y", (d) => this.yScale(d[1]))
-      .attr("height", (d) => this.yScale(d[0]) - this.yScale(d[1]))
-      .attr("width", 5);
+      .attr("height", (d) => this.yScale(d[0]) - this.yScale(d[1]));
   };
 
   updateDims = (dims) => {};
