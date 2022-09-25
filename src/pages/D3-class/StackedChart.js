@@ -18,11 +18,13 @@ class StackedChart {
     return this;
   }
 
-  init = (data, dims, keys) => {
+  init = (data, dims, keys, tooltipDataCallback = () => {}) => {
     this.keys = keys;
+    this.tooltipDataCallback = tooltipDataCallback;
+
     this.setDims(dims); //<-----one
     this.setScales(data); //<-------two
-    this.chart = this.svg.append("g");
+    this.chart = this.svg.append("g").classed("chart", true);
     this.chart.attr(
       "transform",
       `translate(${this.margin.left}, ${this.margin.top})`
@@ -199,10 +201,40 @@ class StackedChart {
             .attr("fill-opacity", 0)
             .attr("x", (d) => this.xScale(d.datetime))
             .on("mouseover", (event, data) => {
-              console.log(data);
               select(event.target).attr("fill-opacity", 0.2);
+
+              const callbackData = { ...data };
+              delete callbackData.id;
+              delete callbackData.datetime;
+
+              select(".tooltip").style("width", this._calculateBarWidth * 14);
+
+              const xPos = () => {
+                const basePos = this.xScale(data.datetime);
+
+                if (basePos > this.innerWidth / 2) {
+                  return (
+                    basePos + this.margin.left - 264 - this._calculateBarWidth()
+                  );
+                }
+
+                return (
+                  basePos + this.margin.left + this._calculateBarWidth() * 2
+                );
+              };
+
+              this.tooltipDataCallback({
+                id: data.id,
+                datetime: data.datetime,
+                data: callbackData,
+                pos: { x: xPos(), y: 100 },
+              });
+              select(".tooltip").style("opacity", 1);
             })
             .on("mouseout", (event, data) => {
+              // We probably want to remove this data after 200ms
+              //   this.tooltipDataCallback(undefined);
+              select(".tooltip").style("opacity", 0);
               select(event.target).attr("fill-opacity", 0);
             });
         },

@@ -10,6 +10,7 @@ import { ReactComponent as DcLow } from "./legend/dcLow.svg";
 import { ReactComponent as DcHigh } from "./legend/dcHigh.svg";
 
 import "./style.scss";
+import { format } from "date-fns";
 
 const LEGEND_ICON_MAPPING = {
   dcLow: DcLow,
@@ -29,6 +30,7 @@ const D3Class = () => {
   const [canvas, setCanvas] = useState(null);
   const [data, setData] = useState(INIT_DATA);
   const [vizInitialized, setVizInitialized] = useState(false);
+  const [tooltipData, setTooltipData] = useState(undefined);
 
   // Effect to deal with adding/removing chart to DOM
   useEffect(() => {
@@ -45,7 +47,7 @@ const D3Class = () => {
   // Effect to deal with initalising
   useEffect(() => {
     if (!vizInitialized && canvas && data) {
-      canvas.init(data, INIT_DIMS, KEYS);
+      canvas.init(data, INIT_DIMS, KEYS, setTooltipData);
       setVizInitialized(true);
     }
   }, [canvas, data]);
@@ -75,6 +77,7 @@ const D3Class = () => {
           height: INIT_DIMS.height + 75 + "px",
           width: INIT_DIMS.width + "px",
           boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+          position: "relative",
         }}
       >
         <div className="legend">
@@ -88,6 +91,23 @@ const D3Class = () => {
             );
           })}
         </div>
+        {tooltipData ? (
+          <div
+            className="tooltip"
+            style={{ top: tooltipData.pos.y, left: tooltipData.pos.x }}
+          >
+            <div className="tooltip__line">
+              <p>{format(tooltipData.datetime, "d LLL y")}</p>
+              <p>time period</p>
+            </div>
+            {Object.entries(tooltipData.data).map(([key, value]) => (
+              <div className="tooltip__line" key={key}>
+                <p>{key}</p>
+                <p>{value}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </Page>
   );
