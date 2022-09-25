@@ -29,8 +29,10 @@ class StackedChart {
     );
 
     this.createAxes(); //<-----three
-    // Create bar group
+
+    // Create bar + hovers groups
     this.bars = this.chart.append("g").classed("bars", true);
+    this.hoverBars = this.chart.append("g").classed("hover-bars", true);
 
     this.updateData(data);
   };
@@ -187,6 +189,7 @@ class StackedChart {
 
   updateData = (data) => {
     this.data = data;
+    this.addHoverBars();
 
     const stackData = stack().offset(stackOffsetDiverging).keys(this.keys)(
       data
@@ -230,6 +233,32 @@ class StackedChart {
       .attr("x", (d) => this.xScale(d.data.datetime) + 1)
       .attr("y", (d) => this.yScale(d[1]))
       .attr("height", (d) => this.yScale(d[0]) - this.yScale(d[1]));
+  };
+
+  addHoverBars = () => {
+    this.hoverBars
+      .selectAll("g")
+      .data(this.data)
+      .join(
+        (enter) => {
+          enter
+            .append("rect")
+            .attr("height", this.innerHeight)
+            .attr("width", this.calculateBarWidth() + 1)
+            .attr("x", this.xScale(this.startDate))
+            .attr("fill", "grey")
+            .attr("fill-opacity", 0)
+            .attr("x", (d) => this.xScale(d.datetime))
+            .on("mouseover", (event, data) => {
+              select(event.target).attr("fill-opacity", 0.2);
+            })
+            .on("mouseout", (event, data) => {
+              select(event.target).attr("fill-opacity", 0);
+            });
+        },
+        null,
+        (exit) => exit.remove()
+      );
   };
 
   updateDims = (dims) => {};
