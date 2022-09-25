@@ -1,10 +1,17 @@
 import { select } from "d3-selection";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear, scaleTime } from "d3-scale";
 import add from "date-fns/add";
 import { format, set } from "date-fns";
+import { stack, stackOffsetDiverging, transition } from "d3";
 
 class StackedChart {
+  keys = ["dcLow", "dcHigh"];
   margin = { left: 60, top: 30, bottom: 30, right: 30 };
+  colorMap = {
+    dcLow: "rgb(191,101,178)",
+    dcHigh: "rgb(1,205,79)",
+    intraday: "rgb(137,192,238)",
+  };
 
   constructor(domNodeCurrent) {
     this.svg = select(domNodeCurrent).append("svg");
@@ -22,6 +29,9 @@ class StackedChart {
     );
 
     this.createAxes(); //<-----three
+    // Create bar group
+    this.bars = this.chart.append("g").classed("bars", true);
+
     this.updateData(data);
   };
 
@@ -40,7 +50,7 @@ class StackedChart {
     const endTime = add(baseTime, { hours: 24 });
 
     // Set up the time scale (we could have this is an arg)
-    this.xScale = scaleLinear()
+    this.xScale = scaleTime()
       .domain([startTime, endTime])
       .range([0, this.innerWidth]);
 
@@ -54,7 +64,6 @@ class StackedChart {
     // Create xAxis
     this.xAxisBottom = this.chart.append("g");
     this.yAxisLeft = this.chart.append("g");
-    //   .attr("transform", `translate(0, ${this.innerHeight})`);
 
     this.startDate = set(new Date(), { hours: 23, minutes: 0 });
     this.endDate = add(this.startDate, { hours: 24 });
@@ -175,35 +184,52 @@ class StackedChart {
   updateData = (data) => {
     this.data = data;
 
-    this.allCircles = this.chart.selectAll(".myCircle").data(this.data);
-    this.allCircles
-      .transition()
-      .duration(500)
-      .attr("class", "myCircle")
-      .attr("fill", "green");
-
-    this.allCircles.join(
-      (enter) => {
-        enter
-          .append("circle")
-          .attr("r", 10)
-          .attr("class", "myCircle")
-          .attr("r", 10)
-          .attr("cx", (d) => this.xScale(d.datetime))
-          .attr("cy", (d) => this.yScale(d.dcLow))
-          .attr("fill", "lightblue");
-      },
-      (update) => {
-        update
-          .transition()
-          .duration(500)
-          .attr("cx", (d) => this.xScale(d.datetime))
-          .attr("cy", (d) => this.yScale(d.dcLow));
-      },
-      (exit) => {
-        exit.remove();
-      }
+    const stackData = stack().offset(stackOffsetDiverging).keys(this.keys)(
+      data
     );
+
+    // Set up transition.
+    const dur = 1000;
+    const t = transition().duration(dur);
+
+    this.bars
+      .selectAll("g")
+      .data(stackData)
+      .join(
+        (enter) =>
+          enter
+            .append("g")
+            .attr("fill", (d) => this.colorMap[d.key])
+            .classed("stack-group", true),
+        null,
+        (exit) => exit.remove()
+      )
+      .selectAll("rect")
+      .data(
+        (d) => d,
+        (d) => d.data.key
+      )
+      .join(
+        (enter) =>
+          enter
+            .append("rect")
+            .attr("class", "bar")
+            // This xScale is starting at far left
+            // rather than where the axis are
+            .attr("x", (d) => {
+              console.log(this.xScale);
+              return this.xScale(d.data.datetime);
+            })
+            .attr("y", (d) => this.yScale(d[1]))
+            .attr("height", () => this.height - this.yScale(0))
+            .attr("width", 5),
+        null,
+        (exit) => exit.remove()
+      )
+      .attr("x", (d) => this.xScale(d.data.datetime))
+      .attr("y", (d) => this.yScale(d[1]))
+      .attr("height", (d) => this.yScale(d[0]) - this.yScale(d[1]))
+      .attr("width", 5);
   };
 
   updateDims = (dims) => {};
