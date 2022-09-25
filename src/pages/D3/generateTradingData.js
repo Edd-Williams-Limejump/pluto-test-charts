@@ -9,14 +9,25 @@ function roundMinutes(date) {
 }
 
 export const generateTimeData = (date, id) => {
+  // Low numbers
+  // return {
+  //   id,
+  //   // id: Math.floor(Math.random() * 100),
+  //   // daHourly: randomIntFromInterval(-5, 0),
+  //   haHHourly: randomIntFromInterval(-1, 0),
+  //   intraday: randomIntFromInterval(0, 3),
+  //   dcLow: randomIntFromInterval(0, 9),
+  //   dcHigh: randomIntFromInterval(-5, 0),
+  //   datetime: new Date(date),
+  // };
   return {
     id,
     // id: Math.floor(Math.random() * 100),
     // daHourly: randomIntFromInterval(-5, 0),
-    haHHourly: randomIntFromInterval(-1, 0),
-    intraday: randomIntFromInterval(0, 3),
-    dcLow: randomIntFromInterval(0, 9),
-    dcHigh: randomIntFromInterval(-5, 0),
+    haHHourly: randomIntFromInterval(-20, 0),
+    intraday: randomIntFromInterval(0, 30),
+    dcLow: randomIntFromInterval(0, 90),
+    dcHigh: randomIntFromInterval(-80, 0),
     datetime: new Date(date),
   };
 };

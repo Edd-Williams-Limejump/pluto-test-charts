@@ -214,8 +214,9 @@ class StackedChart {
           enter
             .append("rect")
             .attr("class", "bar")
-            // This xScale is starting at far left
-            // rather than where the axis are
+            // Base Styling
+            .attr("rx", 1)
+
             .attr("x", (d) => {
               return this.xScale(d.data.datetime);
             })
